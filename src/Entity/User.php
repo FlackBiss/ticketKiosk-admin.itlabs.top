@@ -14,11 +14,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const array ROLES = [
         'Администратор' => 'ROLE_ADMIN',
+        'Аналитик' => 'ROLE_ANALYTIC',
     ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
