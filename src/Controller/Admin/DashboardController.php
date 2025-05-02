@@ -80,6 +80,12 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Логи');
         yield MenuItem::linkToCrud('Исключения', 'fa fa-bug', ExceptionLog::class);
 
+        yield MenuItem::linkToRoute(
+            'Билеты — по датам',
+            'fa fa-ticket-alt',
+            'app_stats_ticket'
+        );
+
         yield MenuItem::section('Прочее');
         yield MenuItem::linkToCrud('Пользователи', 'fas fa-user-gear', User::class)
             ->setPermission('ROLE_ADMIN');

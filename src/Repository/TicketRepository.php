@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Ticket;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -32,6 +33,24 @@ class TicketRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return Ticket[]
+     */
+    public function findByDateInterval(\DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        // клонируем, чтобы не менять оригинальные объекты
+        $fromDate = (clone $from)->setTime(0, 0, 0);
+        $toDate   = (clone $to)->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.createdAt BETWEEN :from AND :to')
+            ->setParameter('from', $fromDate, Types::DATETIME_MUTABLE)
+            ->setParameter('to',   $toDate,   Types::DATETIME_MUTABLE)
+            ->orderBy('t.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

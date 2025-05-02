@@ -1,0 +1,69 @@
+{# templates/admin/field/tickets_charts.html.twig #}
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('app') }}
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
+
+{% block page_content %}
+    <div class="ticket-stats-page container pt-3 pb-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5">Статистика по типам билетов</h1>
+            <p class="text-muted">Выберите диапазон дат для отображения данных</p>
+        </div>
+
+        <div class="filter-card mb-4 shadow-sm">
+            {{ form_start(form, { attr: { class: 'row g-3 align-items-end' } }) }}
+            <div class="col-md-5">
+                <div class="form-floating">
+                    {{ form_widget(form.dateFrom, { attr: { class: 'form-control' } }) }}
+                    {{ form_label(form.dateFrom, 'С даты', { label_attr: { class: 'form-label' } }) }}
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-floating">
+                    {{ form_widget(form.dateTo, { attr: { class: 'form-control' } }) }}
+                    {{ form_label(form.dateTo, 'По дату', { label_attr: { class: 'form-label' } }) }}
+                </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary ms-2 mb-2">Показать</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+
+        <div class="chart-card mb-5 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Диаграмма продаж</h5>
+            </div>
+            <div class="card-body position-relative" style="height: 400px;">
+                {{ render_chart(chart) }}
+            </div>
+        </div>
+
+        {% if statsByType is defined %}
+            <div class="row g-4">
+                {% for type, stats in statsByType %}
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="stats-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ type }}</h5>
+                                <ul class="list-unstyled mt-3 mb-0">
+                                    <li><strong>Продано:</strong> {{ stats.count }}</li>
+                                    <li><strong>Средняя цена:</strong> {{ stats.avgPrice }} ₽</li>
+                                    <li><strong>Сумма:</strong> {{ stats.totalPrice }} ₽</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
