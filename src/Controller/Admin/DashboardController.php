@@ -7,6 +7,8 @@ use App\Entity\ExceptionLog;
 use App\Entity\Information;
 use App\Entity\Mail;
 use App\Entity\News;
+use App\Entity\Scheme;
+use App\Entity\SchemePlace;
 use App\Entity\Sessions;
 use App\Entity\StandBy;
 use App\Entity\Terminal;
@@ -25,6 +27,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DashboardController extends AbstractDashboardController
 {
+    public function __construct(
+        private readonly InformationRepository $informationRepository,
+    )
+    {
+    }
+
     /**
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
@@ -45,10 +53,6 @@ class DashboardController extends AbstractDashboardController
             ->generateRelativeUrls();
     }
 
-    public function __construct(
-        private readonly InformationRepository $informationRepository,
-    ) {}
-
     public function configureMenuItems(): iterable
     {
         yield MenuItem::section('Контент');
@@ -65,6 +69,8 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Мероприятия и билеты');
         yield MenuItem::linkToCrud('Мероприятия', 'fa fa-calendar-check', Event::class);
         yield MenuItem::linkToCrud('Билеты', 'fa fa-ticket-alt', Ticket::class);
+        yield MenuItem::linkToCrud('Схемы зала', 'fa fa-table', Scheme::class);
+        yield MenuItem::linkToCrud('Места', 'fa fa-table', SchemePlace::class);
 
         yield MenuItem::section('Терминалы и сессии');
         yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class);

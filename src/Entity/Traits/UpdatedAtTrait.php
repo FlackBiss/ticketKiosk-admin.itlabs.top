@@ -9,11 +9,15 @@ use Symfony\Component\Serializer\Annotation\Ignore;
 trait UpdatedAtTrait
 {
     /**
-     * @var \DateTime
+     * @var ?\DateTime
      */
-    #[ORM\Column(type: 'datetime', nullable: false)]
+    #[ORM\Column(type: 'datetime', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     #[Ignore]
-    protected \DateTime $updatedAt;
+    protected ?\DateTime $updatedAt;
+
+    public function __construct()
+    {
+    }
 
     public function getUpdatedAt(): \DateTime
     {
