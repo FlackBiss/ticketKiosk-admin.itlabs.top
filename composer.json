@@ -97,8 +97,8 @@
   },
   "repositories": [
     {
-      "type": "path",
-      "url": "/Users/matvey/Documents/php/EasyAdminBundleFork"
+      "type": "github",
+      "url": "https://github.com/VibroMatvey/EasyAdminBundle.git"
     }
   ],
   "require-dev": {
