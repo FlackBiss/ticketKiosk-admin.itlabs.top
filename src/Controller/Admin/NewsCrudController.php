@@ -7,6 +7,7 @@ use App\Controller\Admin\Field\VichImageField;
 use App\Entity\News;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
@@ -40,5 +41,7 @@ class NewsCrudController extends AbstractCrudController
         yield TextField::new('title', 'Заголовок');
         yield TextEditorField::new('description', 'Описание');
         yield DateTimeField::new('dateTimeAt', 'Дата и время');
+
+        yield AssociationField::new('event', 'Мероприятие');
     }
 }
