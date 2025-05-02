@@ -22,27 +22,25 @@ class SessionEvents
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['sessions:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?string $objectName = null;
 
     #[ORM\Column]
-    #[Groups(['sessions:write'])]
     private ?\DateTimeImmutable $dateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     private ?Sessions $session = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?string $coordinates = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?string $response = null;
+
+    #[ORM\ManyToOne(inversedBy: 'sessionEvents')]
+    private ?Event $event = null;
 
     public function getId(): ?int
     {
@@ -105,6 +103,18 @@ class SessionEvents
     public function setResponse(?string $response): static
     {
         $this->response = $response;
+
+        return $this;
+    }
+
+    public function getEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function setEvent(?Event $event): static
+    {
+        $this->event = $event;
 
         return $this;
     }

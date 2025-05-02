@@ -3,17 +3,20 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Dto\TicketInput;
 use App\Entity\Traits\CreatedAtTrait;
 use App\Repository\TicketRepository;
+use App\State\TicketProcessor;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
-        new Post(),
+        new Post(
+            input: TicketInput::class,
+            processor: TicketProcessor::class
+        )
     ],
 )]
 #[ORM\Entity(repositoryClass: TicketRepository::class)]
@@ -35,6 +38,9 @@ class Ticket
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     #[ORM\ManyToOne(inversedBy: 'tickets')]
     private ?Event $event = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
 
     public function getId(): ?int
     {
@@ -73,6 +79,18 @@ class Ticket
     public function setEvent(?Event $event): static
     {
         $this->event = $event;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

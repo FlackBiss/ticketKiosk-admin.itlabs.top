@@ -41,7 +41,7 @@ class ExceptionLogCrudController extends AbstractCrudController
     {
         return parent::configureActions($actions)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->disable(Action::EDIT);
+            ->disable(Action::EDIT, Action::NEW);
     }
 
     public function configureFields(string $pageName): iterable

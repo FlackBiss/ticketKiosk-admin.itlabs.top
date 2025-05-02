@@ -72,10 +72,17 @@ class Event
     #[Groups(['news:read', 'event:read'])]
     private ?int $price = null;
 
+    /**
+     * @var Collection<int, SessionEvents>
+     */
+    #[ORM\OneToMany(targetEntity: SessionEvents::class, mappedBy: 'event')]
+    private Collection $sessionEvents;
+
     public function __construct()
     {
         $this->news = new ArrayCollection();
         $this->tickets = new ArrayCollection();
+        $this->sessionEvents = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -240,6 +247,36 @@ class Event
     public function setPrice(?int $price): static
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SessionEvents>
+     */
+    public function getSessionEvents(): Collection
+    {
+        return $this->sessionEvents;
+    }
+
+    public function addSessionEvent(SessionEvents $sessionEvent): static
+    {
+        if (!$this->sessionEvents->contains($sessionEvent)) {
+            $this->sessionEvents->add($sessionEvent);
+            $sessionEvent->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSessionEvent(SessionEvents $sessionEvent): static
+    {
+        if ($this->sessionEvents->removeElement($sessionEvent)) {
+            // set the owning side to null (unless already changed)
+            if ($sessionEvent->getEvent() === $this) {
+                $sessionEvent->setEvent(null);
+            }
+        }
 
         return $this;
     }

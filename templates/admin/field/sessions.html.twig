@@ -28,8 +28,9 @@
                                 <li>
                                     <p class=\"float-right\">{{ value.dateAt|date('Y-m-d H:i:s') }}</p>
                                     <p>Событие: {{ value.objectName }}</p>
-                                    <p>Параметры: {{ value.params }}</p>
-                                    <p>Тип события: {{ value.eventType }}</p>
+                                    <p>Координаты: {{ value.coordinates }}</p>
+                                    <p>Дата и время: {{ value.dateAt|date('Y-m-d H:i:s') }}</p>
+                                    <p>Ответ: {{ value.response }}</p>
                                 </li>
                             {% endfor %}
                         </ul>

@@ -4,49 +4,45 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
+use App\Dto\SessionsInput;
 use App\Repository\SessionsRepository;
+use App\State\SessionsProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SessionsRepository::class)]
 #[ApiResource(
     operations: [
-        new Post()
+        new Post(
+            input: SessionsInput::class,
+            processor: SessionsProcessor::class
+        )
     ],
-    denormalizationContext: ['groups' => ['sessions:write']],
 )]
 class Sessions
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['sessions:write'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?\DateTimeImmutable $startAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?\DateTimeImmutable $endAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?int $deltaTime = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['sessions:write'])]
     private ?int $countEvents = 0;
 
-    #[Groups(['sessions:write'])]
     #[ORM\OneToMany(targetEntity: SessionEvents::class, mappedBy: 'session', cascade: ['persist', 'remove'])]
     private Collection $events;
 
     #[ORM\ManyToOne(inversedBy: 'sessions')]
-    #[Groups(['sessions:write'])]
     private ?Terminal $terminal = null;
 
     public function __construct()

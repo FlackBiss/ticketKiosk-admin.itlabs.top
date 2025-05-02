@@ -6,11 +6,12 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Dto\ExceptionLogInput;
 use App\Entity\Traits\CreatedAtTrait;
 use App\Repository\ExceptionLogRepository;
+use App\State\ExceptionLogProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ExceptionLogRepository::class)]
@@ -18,9 +19,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(),
         new GetCollection(),
-        new Post()
+        new Post(
+            input: ExceptionLogInput::class,
+            processor: ExceptionLogProcessor::class
+        )
     ],
-    denormalizationContext: ['groups' => ['exceptionLog:write']],
 )]
 class ExceptionLog
 {
@@ -29,28 +32,22 @@ class ExceptionLog
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['exceptionLog:write'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'exceptionLogs')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['exceptionLog:write'])]
     private ?Terminal $terminal = null;
 
-    #[Groups(['exceptionLog:write'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $log = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['exceptionLog:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['exceptionLog:write'])]
     private ?string $code = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['exceptionLog:write'])]
     private ?string $comment = null;
 
     public function getId(): ?int

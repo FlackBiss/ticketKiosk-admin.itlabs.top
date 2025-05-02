@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -49,5 +50,7 @@ class TicketCrudController extends AbstractCrudController
         yield TextField::new('place', 'Место');
         yield NumberField::new('price', 'Цена');
         yield AssociationField::new('event', 'Мероприятие');
+        yield TextField::new('type', 'Тип');
+        yield DateTimeField::new('createdAt', 'Дата создания');
     }
 }
