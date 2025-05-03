@@ -55,30 +55,43 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::section('Контент');
-        yield MenuItem::linkToCrud('Новости', 'fa fa-newspaper', News::class);
+        yield MenuItem::section('Контент')
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Новости', 'fa fa-newspaper', News::class)
+            ->setPermission('ROLE_ADMIN');
         if ($this->informationRepository->count([]) === 0) {
             yield MenuItem::linkToCrud('Информация', 'fa fa-info-circle', Information::class)
-                ->setAction(Action::NEW);
+                ->setAction(Action::NEW)
+                ->setPermission('ROLE_ADMIN');
         } else {
             yield MenuItem::linkToCrud('Информация', 'fa fa-info-circle', Information::class)
-                ->setAction(Action::EDIT)->setEntityId($this->informationRepository->findAll()[0]->getId());
+                ->setAction(Action::EDIT)->setEntityId($this->informationRepository->findAll()[0]->getId())
+                ->setPermission('ROLE_ADMIN');
         }
 
 
-        yield MenuItem::section('Мероприятия и билеты');
-        yield MenuItem::linkToCrud('Мероприятия', 'fa fa-calendar-check', Event::class);
-        yield MenuItem::linkToCrud('Билеты', 'fa fa-ticket-alt', Ticket::class);
-        yield MenuItem::linkToCrud('Схемы зала', 'fa fa-table', Scheme::class);
-        yield MenuItem::linkToCrud('Места', 'fa fa-chair', Place::class);
+        yield MenuItem::section('Мероприятия и билеты')
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Мероприятия', 'fa fa-calendar-check', Event::class)
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Билеты', 'fa fa-ticket-alt', Ticket::class)
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Схемы зала', 'fa fa-table', Scheme::class)
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Места', 'fa fa-chair', Place::class)
+            ->setPermission('ROLE_ADMIN');
 
         yield MenuItem::section('Терминалы и сессии');
-        yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class);
+        yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class)
+            ->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Сессии', 'fa fa-clock', Sessions::class);
-        yield MenuItem::linkToCrud('Ожидание', 'fa fa-pause', StandBy::class);
+        yield MenuItem::linkToCrud('Ожидание', 'fa fa-pause', StandBy::class)
+            ->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::section('Логи');
-        yield MenuItem::linkToCrud('Исключения', 'fa fa-bug', ExceptionLog::class);
+        yield MenuItem::section('Логи')
+            ->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Исключения', 'fa fa-bug', ExceptionLog::class)
+            ->setPermission('ROLE_ADMIN');
 
         yield MenuItem::linkToRoute(
             'Билеты — по датам',
