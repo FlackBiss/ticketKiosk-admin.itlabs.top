@@ -86,7 +86,7 @@ class DashboardController extends AbstractDashboardController
             ->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Сессии', 'fa fa-clock', Sessions::class)
             ->setPermission('ROLE_ADMIN');
-        yield MenuItem::linkToCrud('Ожидание', 'fa fa-pause', StandBy::class)
+        yield MenuItem::linkToCrud('Режим ожидания', 'fa fa-terminal', StandBy::class)
             ->setPermission('ROLE_ADMIN');
 
         yield MenuItem::section('Логи')
