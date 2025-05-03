@@ -18,22 +18,28 @@
             <p class="text-muted">Выберите диапазон дат для отображения данных</p>
         </div>
 
-        <div class="filter-card mb-4 shadow-sm">
-            {{ form_start(form, { attr: { class: 'row g-3 align-items-end' } }) }}
-            <div class="col-md-5">
-                <div class="form-floating">
+        <div class="filter-card mb-4 shadow-sm card p-4">
+            {{ form_start(form) }}
+            <div class="row gy-3 gx-4 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">С даты</label>
                     {{ form_widget(form.dateFrom, { attr: { class: 'form-control' } }) }}
-                    {{ form_label(form.dateFrom, 'С даты', { label_attr: { class: 'form-label' } }) }}
                 </div>
-            </div>
-            <div class="col-md-5">
-                <div class="form-floating">
+                <div class="col-md-4">
+                    <label class="form-label">По дату</label>
                     {{ form_widget(form.dateTo, { attr: { class: 'form-control' } }) }}
-                    {{ form_label(form.dateTo, 'По дату', { label_attr: { class: 'form-label' } }) }}
                 </div>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary ms-2 mb-2">Показать</button>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">Показать</button>
+                    <button
+                            type="submit"
+                            formaction="{{ path('app_stats_ticket_export') }}"
+                            formmethod="post"
+                            class="btn btn-outline-success flex-fill"
+                    >
+                        Excel
+                    </button>
+                </div>
             </div>
             {{ form_end(form) }}
         </div>
