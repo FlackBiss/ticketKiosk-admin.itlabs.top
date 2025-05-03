@@ -50,7 +50,8 @@ class DashboardController extends AbstractDashboardController
             ->setTitle('<span>Админ-панель</span>')
             ->setFaviconPath('favicon.ico')
             ->renderContentMaximized()
-            ->generateRelativeUrls();
+            ->generateRelativeUrls()
+            ->disableDarkMode();
     }
 
     public function configureMenuItems(): iterable

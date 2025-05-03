@@ -24,7 +24,12 @@ security:
             custom_authenticator: App\Security\CustomAuthenticator
             logout:
                 path: app_logout
-#        api:
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /admin
+
+            #        api:
 #            pattern: ^/api/
 #            stateless: true
 #            provider: app_client_provider
