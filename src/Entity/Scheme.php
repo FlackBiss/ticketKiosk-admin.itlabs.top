@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\SchemeRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,6 +18,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\Entity(repositoryClass: SchemeRepository::class)]
 class Scheme
 {
+    use UpdatedAtTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -26,9 +30,9 @@ class Scheme
     #[Groups(['scheme:read'])]
     private string $name;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['scheme:read'])]
-    private string $image = "";
+    private ?string $image = null;
 
     #[Vich\UploadableField(mapping: 'scheme_images', fileNameProperty: 'image')]
     #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])]
@@ -95,10 +99,10 @@ class Scheme
     }
 
     /**
-     * @param string $image
+     * @param ?string $image
      * @return Scheme
      */
-    public function setImage(string $image): Scheme
+    public function setImage(?string $image): Scheme
     {
         $this->image = $image;
         return $this;
@@ -119,6 +123,10 @@ class Scheme
     public function setImageFile(?File $imageFile): Scheme
     {
         $this->imageFile = $imageFile;
+        if (null !== $imageFile) {
+            $this->updatedAt = new DateTime();
+        }
+
         return $this;
     }
 
