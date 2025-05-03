@@ -1,6 +1,7 @@
 /.idea
 composer.lock
 /public/files
+/public/media
 /public/dump.sql
 /public/dump.zip
 /public/images

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\Admin\Field\VichImageField;
 use App\Entity\Scheme;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -30,10 +31,9 @@ class SchemeCrudController extends AbstractCrudController
         yield IdField::new('id')
             ->hideOnForm();
         yield TextField::new('name', 'Название');
-        yield MapField::new('scheme', 'Схема зала')
-            ->setObjectIdentifierPropertyName('id')
-            ->setObjectTitlePropertyName('name')
-            ->setObjectMapPropertyName('scheme')
-            ->setMapObjectsPropertyName('places');
+        yield VichImageField::new('imageFile', 'Изображение')
+            ->setRequired(true)
+            ->setFormTypeOption('allow_delete', false)
+            ->hideOnIndex();
     }
 }

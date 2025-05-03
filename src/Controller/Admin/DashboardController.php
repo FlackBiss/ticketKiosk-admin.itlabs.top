@@ -8,7 +8,7 @@ use App\Entity\Information;
 use App\Entity\Mail;
 use App\Entity\News;
 use App\Entity\Scheme;
-use App\Entity\SchemePlace;
+use App\Entity\Place;
 use App\Entity\Sessions;
 use App\Entity\StandBy;
 use App\Entity\Terminal;
@@ -70,7 +70,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Мероприятия', 'fa fa-calendar-check', Event::class);
         yield MenuItem::linkToCrud('Билеты', 'fa fa-ticket-alt', Ticket::class);
         yield MenuItem::linkToCrud('Схемы зала', 'fa fa-table', Scheme::class);
-        yield MenuItem::linkToCrud('Места', 'fa fa-table', SchemePlace::class);
+        yield MenuItem::linkToCrud('Места', 'fa fa-chair', Place::class);
 
         yield MenuItem::section('Терминалы и сессии');
         yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class);

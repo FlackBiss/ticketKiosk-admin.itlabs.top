@@ -78,6 +78,10 @@ class Event
     #[ORM\OneToMany(targetEntity: SessionEvents::class, mappedBy: 'event')]
     private Collection $sessionEvents;
 
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Scheme $scheme = null;
+
     public function __construct()
     {
         $this->news = new ArrayCollection();
@@ -277,6 +281,18 @@ class Event
                 $sessionEvent->setEvent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getScheme(): ?Scheme
+    {
+        return $this->scheme;
+    }
+
+    public function setScheme(?Scheme $scheme): static
+    {
+        $this->scheme = $scheme;
 
         return $this;
     }

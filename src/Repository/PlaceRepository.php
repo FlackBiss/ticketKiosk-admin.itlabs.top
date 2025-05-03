@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\SchemePlace;
+use App\Entity\Place;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<SchemePlace>
+ * @extends ServiceEntityRepository<Place>
  */
-class SchemePlaceRepository extends ServiceEntityRepository
+class PlaceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, SchemePlace::class);
+        parent::__construct($registry, Place::class);
     }
 
-    public function save(SchemePlace $entity, bool $flush = false): void
+    public function save(Place $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -25,7 +25,7 @@ class SchemePlaceRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(SchemePlace $entity, bool $flush = false): void
+    public function remove(Place $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
