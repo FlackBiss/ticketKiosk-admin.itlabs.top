@@ -33,6 +33,7 @@ class TicketCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         $filters->add('price');
+        $filters->add('type');
         $filters->add('event');
 
         return parent::configureFilters($filters);
@@ -41,7 +42,7 @@ class TicketCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
-            ->disable(Action::NEW, Action::EDIT);
+            ->disable(Action::NEW, Action::EDIT, Action::DELETE);
     }
 
     public function configureFields(string $pageName): iterable
