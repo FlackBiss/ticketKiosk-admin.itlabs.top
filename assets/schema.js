@@ -1,4 +1,4 @@
-import {Canvas, Control, FabricImage, Object, Rect, util} from 'fabric';
+import {Canvas, Control, Image, Object, Rect, util} from 'fabric';
 
 const canvas = new Canvas('canvas', {
     backgroundColor: '#000000',
@@ -21,13 +21,12 @@ async function loadBackgroundImage() {
         alert('No image selected');
         return;
     }
-
     const response = await fetch(`/api/schemes/${imageName}`);
     const data = await response.json();
-    const img = await FabricImage.fromURL(data.image, {crossOrigin: 'anonymous'});
+    const img = await Image.fromURL(data.image, {crossOrigin: 'anonymous'});
+
     canvas.backgroundImage = img
-    canvas.width = img.width
-    canvas.height = img.height
+    canvas.setDimensions({width: img.width, height: img.height});
     canvas.backgroundColor = null;
     canvas.renderAll();
 }
