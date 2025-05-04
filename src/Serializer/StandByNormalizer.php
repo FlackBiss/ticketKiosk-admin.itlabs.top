@@ -22,7 +22,7 @@ readonly class StandByNormalizer implements NormalizerInterface
         /* @var StandBy $object */
         $data = $this->normalizer->normalize($object, $format, $context);
 
-        $data['image'] = $this->storage->resolveUri($object, 'imageFile');
+        $data['media'] = $this->storage->resolveUri($object, 'mediaFile');
 
         return $data;
     }
