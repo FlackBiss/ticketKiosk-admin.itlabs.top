@@ -1,8 +1,11 @@
 {
   "dependencies": {
+    "bootstrap": "^5.3.5",
     "chart.js": "^4.4.9",
     "fabric": "^6.6.4",
-    "flatpickr": "^4.6.13"
+    "flatpickr": "^4.6.13",
+    "tom-select": "^2.4.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",

@@ -82,6 +82,9 @@ class Event
     #[ORM\JoinColumn(nullable: true)]
     private ?Scheme $scheme = null;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $schemeData;
+
     private string $schemeWidget;
 
     public function __construct()
@@ -299,21 +302,31 @@ class Event
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    public function getSchemeData(): ?string
+    {
+        return json_encode($this->schemeData, true);
+    }
+
+    public function setSchemeData(?string $schemeData): Event
+    {
+        $this->schemeData = json_decode($schemeData);
+        return $this;
+    }
+
     public function getSchemeWidget(): string
     {
         return $this->schemeWidget;
     }
 
-    /**
-     * @param string $schemeWidget
-     * @return Event
-     */
     public function setSchemeWidget(string $schemeWidget): Event
     {
         $this->schemeWidget = $schemeWidget;
         return $this;
+    }
+
+    #[Groups(['news:read', 'event:read'])]
+    public function getSchemeDataJson(): ?array
+    {
+        return $this->schemeData;
     }
 }

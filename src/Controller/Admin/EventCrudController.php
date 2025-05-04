@@ -78,6 +78,9 @@ class EventCrudController extends AbstractCrudController
         yield HiddenField::new('schemeWidget')
             ->setFormTypeOptions([
                 'block_name' => 'schema',
-            ]);
+            ])
+            ->onlyOnForms();
+        yield HiddenField::new('schemeData')
+            ->onlyOnForms();
     }
 }

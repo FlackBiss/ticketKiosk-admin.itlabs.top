@@ -8,29 +8,6 @@
         #controls {
             margin-bottom: 10px;
         }
-
-        button, select {
-            margin-right: 10px;
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        #modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        #modal select, #modal button {
-            margin: 10px 0;
-        }
     </style>
     <div id="controls">
         <button type="button" class="btn btn-primary" id="addChairBtn">Добавить место</button>
@@ -39,15 +16,39 @@
         <canvas id="canvas" width="600"></canvas>
     </div>
 
-    <div id="modal">
-        <h3>Select Chair Type</h3>
-        <select id="chairType">
-            <option value="vip">VIP (Red)</option>
-            <option value="standard">Standard (Blue)</option>
-            <option value="accessible">Accessible (Green)</option>
-        </select>
-        <br>
-        <button type="button" class="btn btn-success" id="confirmChairBtn">Confirm</button>
-        <button type="button" class="btn btn-danger" id="cancelChairBtn">Cancel</button>
+    <div id="placeSelectModal">
+        <div class="modal-dialog fade show" id="placeSelectModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="placeSelectModalLabel">Выберите объект</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off">
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmObject" class="btn btn-primary">Подтвердить</button>
+                    <button type="button" id="cancelObject" class="btn btn-secondary" data-bs-dismiss="modal">Отмена
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="infoContent">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}s
