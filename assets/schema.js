@@ -25,12 +25,11 @@ async function loadBackgroundImage() {
     const data = await response.json();
     const img = await Image.fromURL(data.image, {crossOrigin: 'anonymous'});
 
-    canvas.backgroundImage = img
-    canvas.setDimensions({width: img.width, height: img.height});
+    canvas.backgroundImage = img;
+    canvas.setDimensions({ width: img.width, height: img.height });
     canvas.backgroundColor = null;
     canvas.renderAll();
 }
-
 
 function showChairModal(e) {
     e.preventDefault();
@@ -133,10 +132,7 @@ async function addChair(e) {
     canvas.add(chair);
     canvas.setActiveObject(chair);
     canvas.requestRenderAll();
-    closeModal({
-        preventDefault: () => {
-        }
-    });
+    closeModal({ preventDefault: () => {} });
 }
 
 function clearCanvas(e) {
@@ -175,6 +171,28 @@ document.addEventListener('DOMContentLoaded', () => {
     saveLayoutBtn?.addEventListener('click', saveLayout);
     confirmChairBtn?.addEventListener('click', addChair);
     cancelChairBtn?.addEventListener('click', closeModal);
+
+    // Constrain objects within canvas boundaries
+    canvas.on('object:moving', function(e) {
+        const obj = e.target;
+        obj.setCoords();
+        const br = obj.getBoundingRect(true);
+
+        if (br.left < 0) {
+            obj.left -= br.left;
+        }
+        if (br.top < 0) {
+            obj.top -= br.top;
+        }
+        if (br.left + br.width > canvas.getWidth()) {
+            obj.left -= (br.left + br.width - canvas.getWidth());
+        }
+        if (br.top + br.height > canvas.getHeight()) {
+            obj.top -= (br.top + br.height - canvas.getHeight());
+        }
+
+        canvas.requestRenderAll();
+    });
 });
 
 document.addEventListener('keydown', (e) => {
