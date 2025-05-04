@@ -24,6 +24,9 @@ class Place
     #[Groups(['scheme:read'])]
     private float $price;
 
+    #[ORM\Column(length: 255)]
+    private ?string $color = null;
+
     /**
      * @return int
      */
@@ -75,6 +78,18 @@ class Place
     public function setPrice(float $price): Place
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): static
+    {
+        $this->color = $color;
+
         return $this;
     }
 }

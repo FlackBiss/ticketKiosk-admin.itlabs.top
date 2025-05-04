@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\SchemeRepository;
 use DateTime;
@@ -16,6 +18,12 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[Vich\Uploadable]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SchemeRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+    ],
+    normalizationContext: ['groups' => ['scheme:read']]
+)]
 class Scheme
 {
     use UpdatedAtTrait;
@@ -44,14 +52,14 @@ class Scheme
     #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'scheme', orphanRemoval: true)]
     private Collection $events;
 
-    public function __toString(): string
-    {
-        return $this->name;
-    }
-
     public function __construct()
     {
         $this->events = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 
     /**
@@ -91,9 +99,9 @@ class Scheme
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getImage(): string
+    public function getImage(): ?string
     {
         return $this->image;
     }

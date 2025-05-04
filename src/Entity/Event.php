@@ -82,6 +82,8 @@ class Event
     #[ORM\JoinColumn(nullable: true)]
     private ?Scheme $scheme = null;
 
+    private string $schemeWidget;
+
     public function __construct()
     {
         $this->news = new ArrayCollection();
@@ -294,6 +296,24 @@ class Event
     {
         $this->scheme = $scheme;
 
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSchemeWidget(): string
+    {
+        return $this->schemeWidget;
+    }
+
+    /**
+     * @param string $schemeWidget
+     * @return Event
+     */
+    public function setSchemeWidget(string $schemeWidget): Event
+    {
+        $this->schemeWidget = $schemeWidget;
         return $this;
     }
 }

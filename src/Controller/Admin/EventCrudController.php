@@ -3,11 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Event;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\HiddenField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
@@ -25,16 +28,24 @@ class EventCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
+            ->setFormThemes(['admin/field/schema.html.twig', '@EasyAdmin/crud/form_theme.html.twig'])
             ->setEntityLabelInPlural('Мероприятия')
             ->setEntityLabelInSingular('мероприятие')
             ->setPageTitle(Crud::PAGE_NEW, 'Добавление мероприятия')
             ->setPageTitle(Crud::PAGE_EDIT, 'Изменение мероприятия');
     }
 
+    public function configureAssets(Assets $assets): Assets
+    {
+        $assets->addWebpackEncoreEntry('schema');
+        return parent::configureAssets($assets);
+    }
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id', 'ID')->hideOnForm();
 
+        yield FormField::addTab('Основная информация');
         yield TextField::new('title', 'Название');
         yield TextEditorField::new('description', 'Описание');
 
@@ -57,11 +68,16 @@ class EventCrudController extends AbstractCrudController
         yield AssociationField::new('news', 'Новости')
             ->hideOnForm();
 
-        yield AssociationField::new('scheme', 'Схема зала');
-
         yield NumberField::new('price', 'Цена');
 
         yield AssociationField::new('tickets', 'Билеты')
             ->hideOnForm();
+
+        yield FormField::addTab('Схема зала');
+        yield AssociationField::new('scheme', 'Схема зала');
+        yield HiddenField::new('schemeWidget')
+            ->setFormTypeOptions([
+                'block_name' => 'schema',
+            ]);
     }
 }
