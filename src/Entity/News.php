@@ -22,7 +22,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
         new Get(),
         new GetCollection(),
     ],
-    normalizationContext: ['groups' => ['news']]
+    normalizationContext: ['groups' => ['news:read']]
 )]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 class News
