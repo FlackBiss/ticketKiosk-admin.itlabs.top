@@ -4,6 +4,7 @@ namespace App\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Entity\Event;
 use App\Entity\ExceptionLog;
 use App\Entity\Ticket;
 use App\Repository\EventRepository;
@@ -30,6 +31,23 @@ readonly class TicketProcessor implements ProcessorInterface
         if ($this->eventRepository->find($data->eventId) === null)
         {
             throw new \Exception('По введённому id, мероприятия не существует');
+        }
+
+        if ($data->uuid)
+        {
+            $event = $this->eventRepository->find($data->eventId);
+
+            $schemeData = $event->getSchemeDataJson();
+
+            foreach ($schemeData as &$value) {
+                if ($value['uuid'] === $data->uuid) {
+                    $value['booked'] = true;
+                    break;
+                }
+            }
+
+            $event->setSchemeData(json_encode($schemeData, true));
+            $this->eventRepository->save($event, true);
         }
 
         $ticket = new Ticket();

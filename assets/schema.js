@@ -211,7 +211,7 @@ function saveData() {
         top: place.top,
         width: place.getScaledWidth(),
         height: place.getScaledHeight(),
-        booked: false
+        booked: place.placeData.booked ?? false,
     }));
     schemeDataField.value = JSON.stringify(data);
 }
@@ -342,4 +342,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadBackgroundImage();
         loadObjects();
     }
+
+    const typeSelect  = document.getElementById('Event_type');
+    const schemeTabLi  = document.querySelector('a[href="#tab-shema-zala"]').closest('li.nav-item');
+    const priceField   = document.getElementById('Event_price').closest('.form-group');
+    const placesField  = document.getElementById('Event_places').closest('.form-group');
+    const priceInput   = document.getElementById('Event_price');
+    const placesInput  = document.getElementById('Event_places');
+
+    function updateVisibility() {
+        const type = typeSelect.value;
+        schemeTabLi.style.display = type === 'Места согласно билетам' ? '' : 'none';
+        priceField.style.display = type === 'Места согласно билетам' ? 'none' : '';
+        placesField.style.display = (type === 'Места согласно билетам' || type === 'Неограниченное количество мест') ? 'none' : '';
+    }
+
+    function onTypeChange() {
+        const type = typeSelect.value;
+        updateVisibility(type);
+        priceInput.value  = '';
+        placesInput.value = '';
+    }
+
+    onTypeChange();
+
+    typeSelect.addEventListener('change', onTypeChange);
 });

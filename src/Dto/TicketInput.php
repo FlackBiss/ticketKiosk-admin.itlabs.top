@@ -9,4 +9,5 @@ class TicketInput
     public float $price;
     public int $eventId;
     public string $type;
+    public ?string $uuid;
 }
