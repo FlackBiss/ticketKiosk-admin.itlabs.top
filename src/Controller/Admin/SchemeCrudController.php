@@ -34,7 +34,8 @@ class SchemeCrudController extends AbstractCrudController
         yield VichImageField::new('imageFile', 'Изображение')
             ->setRequired(true)
             ->setFormTypeOption('allow_delete', false)
-            ->hideOnIndex();
+            ->hideOnIndex()
+            ->hideWhenUpdating();
         yield VichImageField::new('image', 'Изображение')
             ->setRequired(true)
             ->setFormTypeOption('allow_delete', false)
