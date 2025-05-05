@@ -48,6 +48,7 @@ class EventCrudController extends AbstractCrudController
         yield FormField::addTab('Основная информация');
         yield TextField::new('title', 'Название');
         yield TextEditorField::new('description', 'Описание');
+        yield TextEditorField::new('shortDescription', 'Краткое описание');
 
         yield DateTimeField::new('dateTimeAt', 'Дата и время');
 

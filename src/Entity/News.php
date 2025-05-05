@@ -60,6 +60,10 @@ class News
     #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])]
     private ?File $imageFile = null;
 
+    #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['news:read'])]
+    private ?string $shortDescription = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -136,6 +140,18 @@ class News
         if (null !== $imageFile) {
             $this->updatedAt = new DateTime();
         }
+
+        return $this;
+    }
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(string $shortDescription): static
+    {
+        $this->shortDescription = $shortDescription;
 
         return $this;
     }

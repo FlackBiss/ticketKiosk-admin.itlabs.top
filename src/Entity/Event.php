@@ -2,9 +2,12 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use App\Controller\Event\EventController;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,10 +18,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(),
-        new GetCollection(),
+        new GetCollection(filters: ['app.event_date_filter']),
     ],
     normalizationContext: ['groups' => ['event:read']],
 )]
+#[GetCollection(uriTemplate: 'events_dates', controller: EventController::class, paginationEnabled: false,)]
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
 {
@@ -86,6 +90,10 @@ class Event
     private ?array $schemeData;
 
     private string $schemeWidget;
+
+    #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['news:read', 'event:read'])]
+    private ?string $shortDescription = null;
 
     public function __construct()
     {
@@ -328,5 +336,17 @@ class Event
     public function getSchemeDataJson(): ?array
     {
         return $this->schemeData;
+    }
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(string $shortDescription): static
+    {
+        $this->shortDescription = $shortDescription;
+
+        return $this;
     }
 }

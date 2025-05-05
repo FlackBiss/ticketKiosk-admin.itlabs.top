@@ -23,3 +23,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    app.event_date_filter:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { dateTimeAt: ~ }
+        tags: ['api_platform.filter']

@@ -40,6 +40,7 @@ class NewsCrudController extends AbstractCrudController
 
         yield TextField::new('title', 'Заголовок');
         yield TextEditorField::new('description', 'Описание');
+        yield TextEditorField::new('shortDescription', 'Краткое описание');
         yield DateTimeField::new('dateTimeAt', 'Дата и время');
 
         yield AssociationField::new('event', 'Мероприятие');
