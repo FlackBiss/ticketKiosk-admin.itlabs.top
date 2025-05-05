@@ -16,7 +16,6 @@ deleteImg.src = deleteIcon;
 const infoImg = document.createElement('img');
 infoImg.src = infoIcon;
 
-// Configure Fabric object defaults
 FabricObject.prototype.transparentCorners = false;
 FabricObject.prototype.cornerColor = 'blue';
 FabricObject.prototype.cornerStyle = 'circle';
@@ -26,7 +25,6 @@ FabricObject.prototype.toObject = (function (toObject) {
     };
 })(FabricObject.prototype.toObject);
 
-// Load background image from server
 async function loadBackgroundImage() {
     const select = document.getElementById('Event_scheme');
     const imageName = select.value;
@@ -69,7 +67,6 @@ function showChairModal(e) {
     modal.show();
 }
 
-// Render delete icon
 function renderIcon(ctx, left, top, _styleOverride, fabricObject) {
     const size = this.cornerSize;
     ctx.save();
@@ -79,17 +76,14 @@ function renderIcon(ctx, left, top, _styleOverride, fabricObject) {
     ctx.restore();
 }
 
-// Render info icon
 function renderInfo(ctx, left, top, _styleOverride, fabricObject) {
     const size = this.cornerSize;
     ctx.save();
     ctx.translate(left, top);
     ctx.rotate(util.degreesToRadians(fabricObject.angle));
     ctx.drawImage(infoImg, -size / 2, -size / 2, size, size);
-    ctx.restore();
-}
+    ctx.restore();}
 
-// Delete chair object
 function deleteObject(_eventData, transform) {
     const canvas = transform.target.canvas;
     canvas.remove(transform.target);
@@ -220,14 +214,21 @@ function saveData() {
 function loadObjects() {
     const schemeData = document.getElementById('Event_schemeData');
     JSON.parse(schemeData.value).forEach(place => {
+        const isBooked = place.booked === true;
+
         const chair = new Rect({
             left: place.left,
             top: place.top,
             width: place.width,
             height: place.height,
             opacity: 0.5,
-            fill: place.color,
-            laminated: true,
+            fill: isBooked ? '#999999' : place.color,
+            selectable: !isBooked,
+            evented: !isBooked,
+            hasControls: !isBooked,
+            hasBorders: !isBooked,
+            lockMovementX: isBooked,
+            lockMovementY: isBooked,
             type: 'place',
             placeData: {
                 placeId: place.placeId,
@@ -235,10 +236,19 @@ function loadObjects() {
                 name: place.name,
                 price: place.price,
                 color: place.color,
-                booked: place.booked
+                booked: isBooked
             },
             objectCaching: false
         });
+
+        if (isBooked) {
+            chair.evented = true;
+            chair.selectable = false;
+            chair.on('mousedown', () => {
+                const modal = new bootstrap.Modal(document.getElementById('bookedWarningModal'));
+                modal.show();
+            });
+        }
 
         chair.controls.deleteControl = new Control({
             x: 0.5,

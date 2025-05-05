@@ -1,27 +1,25 @@
 {% block _Event_schema_widget %}
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        #controls {
-            margin-bottom: 10px;
-        }
-    </style>
-    <div id="controls">
-        <button type="button" class="btn btn-primary" id="addChairBtn">Добавить место</button>
-    </div>
-    <div id="canvas-container">
-        <canvas id="canvas" width="600"></canvas>
+    <div class="form-group">
+        <label class="form-label">Схема зала</label>
+        <div class="ea-field-body">
+            <div class="card p-3 bg-white border mb-4">
+                <div id="controls" class="mb-3">
+                    <button type="button" class="btn btn-primary" id="addChairBtn">Добавить место</button>
+                </div>
+                <div id="canvas-container" class="border rounded">
+                    <canvas id="canvas" style="width: 100%; height: auto; background-color: transparent;"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="placeSelectModal">
-        <div class="modal-dialog fade show" id="placeSelectModal">
+    {# Модальное окно выбора объекта #}
+    <div class="modal fade" id="placeSelectModal" tabindex="-1" aria-labelledby="placeSelectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="placeSelectModalLabel">Выберите объект</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
                     <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off">
@@ -29,19 +27,19 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="confirmObject" class="btn btn-primary">Подтвердить</button>
-                    <button type="button" id="cancelObject" class="btn btn-secondary" data-bs-dismiss="modal">Отмена
-                    </button>
+                    <button type="button" id="cancelObject" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>
     </div>
 
+    {# Модальное окно информации о месте #}
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body" id="infoContent">
                 </div>
@@ -51,4 +49,22 @@
             </div>
         </div>
     </div>
-{% endblock %}s
+
+    {# Модальное окно предупреждения о брони #}
+    <div class="modal fade" id="bookedWarningModal" tabindex="-1" aria-labelledby="bookedWarningModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning bg-warning-subtle">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookedWarningModalLabel">Место недоступно</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Это место уже забронировано и недоступно для редактирования или добавления.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Понятно</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
