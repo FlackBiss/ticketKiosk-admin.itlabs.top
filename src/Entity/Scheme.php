@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\SchemeRepository;
 use DateTime;
@@ -21,8 +22,10 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ApiResource(
     operations: [
         new Get(),
+        new GetCollection(),
     ],
-    normalizationContext: ['groups' => ['scheme:read']]
+    normalizationContext: ['groups' => ['scheme:read']],
+    paginationEnabled: false,
 )]
 class Scheme
 {
