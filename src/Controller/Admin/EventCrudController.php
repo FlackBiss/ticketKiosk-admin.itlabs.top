@@ -48,7 +48,7 @@ class EventCrudController extends AbstractCrudController
         yield FormField::addTab('Основная информация');
         yield TextField::new('title', 'Название');
         yield TextEditorField::new('description', 'Описание');
-        yield TextEditorField::new('shortDescription', 'Краткое описание');
+        yield TextField::new('shortDescription', 'Краткое описание');
 
         yield DateTimeField::new('dateTimeAt', 'Дата и время');
 
@@ -60,7 +60,17 @@ class EventCrudController extends AbstractCrudController
                     'Места согласно билетам' => 'Места согласно билетам',
                 ]
             );
-        yield TextField::new('age', 'Возраст');
+        yield ChoiceField::new('age', 'Возраст')
+            ->setChoices
+            (
+                [
+                    '0+' => '0+',
+                    '6+' => '6+',
+                    '12+' => '12+',
+                    '16+' => '16+',
+                    '18+' => '18+',
+                ]
+            );
 
         yield TimeField::new('duration', 'Длительность');
 

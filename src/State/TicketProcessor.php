@@ -57,7 +57,10 @@ readonly class TicketProcessor implements ProcessorInterface
             ->setPlace($data->place)
             ->setPrice($data->price)
             ->setEvent($event)
-            ->setType($data->type);
+            ->setType($data->type)
+            ->setEmail($data->email)
+            ->setSurname($data->surname)
+            ->setName($data->name);
 
         $this->ticketRepository->save($ticket, true);
 

@@ -17,47 +17,47 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(filters: ['app.event_date_filter']),
+        new GetCollection(order: ['dateTimeAt' => 'DESC'], filters: ['app.event_date_filter', 'app.event_title_filter', 'app.event_type_filter', 'app.event_scheme_filter']),
     ],
     normalizationContext: ['groups' => ['event:read']],
 )]
 #[GetCollection(uriTemplate: 'events_dates', controller: EventController::class, paginationEnabled: false,)]
+#[Get(normalizationContext: ['groups' => ['event:reads']])]
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?\DateTimeImmutable $dateTimeAt = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $age = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?\DateTimeInterface $duration = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?int $places = null;
 
     /**
@@ -73,7 +73,7 @@ class Event
     private Collection $tickets;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?int $price = null;
 
     /**
@@ -84,6 +84,7 @@ class Event
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?Scheme $scheme = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
@@ -92,7 +93,7 @@ class Event
     private string $schemeWidget;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $shortDescription = null;
 
     public function __construct()
@@ -332,7 +333,7 @@ class Event
         return $this;
     }
 
-    #[Groups(['news:read', 'event:read'])]
+    #[Groups(['event:reads'])]
     public function getSchemeDataJson(): ?array
     {
         return $this->schemeData;
@@ -348,5 +349,23 @@ class Event
         $this->shortDescription = $shortDescription;
 
         return $this;
+    }
+
+    #[Groups(['event:read', 'event:reads', 'news:read'])]
+    public function getStartPrice(): int
+    {
+        $basePrice = $this->getPrice();
+        $schemePrices = array_column((array) $this->getSchemeDataJson(), 'price');
+
+        $prices = array_filter(
+            array_merge([$basePrice], $schemePrices),
+            fn($p) => is_int($p) && $p >= 0
+        );
+
+        if (empty($prices)) {
+            return 0;
+        }
+
+        return min($prices);
     }
 }

@@ -5,22 +5,17 @@ namespace App\Controller\Event;
 use App\Repository\EventRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Entity\Event;
 
 class EventController extends AbstractController
 {
-    public function __construct(private readonly EventRepository $eventRepository,)
+    public function __invoke(EventRepository $eventRepository): JsonResponse
     {
-    }
-
-    public function __invoke(): JsonResponse
-    {
-        $events = $this->eventRepository->findAll();
-
-        $dates = array_map(
-            fn($event) => $event->getDateTimeAt(),
-            $events
-        );
-
-        return $this->json($dates);
+        return $this->json([
+            'dates' => array_map(
+                fn(Event $event) => $event->getDateTimeAt(),
+                $eventRepository->findAll()
+            ),
+        ]);
     }
 }

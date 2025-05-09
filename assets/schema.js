@@ -354,27 +354,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const typeSelect  = document.getElementById('Event_type');
-    const schemeTabLi  = document.querySelector('a[href="#tab-shema-zala"]').closest('li.nav-item');
-    const priceField   = document.getElementById('Event_price').closest('.form-group');
-    const placesField  = document.getElementById('Event_places').closest('.form-group');
-    const priceInput   = document.getElementById('Event_price');
-    const placesInput  = document.getElementById('Event_places');
+    const priceInput  = document.getElementById('Event_price');
+    const placesInput = document.getElementById('Event_places');
+    const schemeTabLi = document.querySelector('a[href="#tab-shema-zala"]').closest('li.nav-item');
+    const priceField  = priceInput.closest('.form-group');
+    const placesField = placesInput.closest('.form-group');
 
     function updateVisibility() {
         const type = typeSelect.value;
         schemeTabLi.style.display = type === 'Места согласно билетам' ? '' : 'none';
-        priceField.style.display = type === 'Места согласно билетам' ? 'none' : '';
-        placesField.style.display = (type === 'Места согласно билетам' || type === 'Неограниченное количество мест') ? 'none' : '';
+        priceField.style.display    = type === 'Места согласно билетам' ? 'none' : '';
+        placesField.style.display   = (type === 'Места согласно билетам' || type === 'Неограниченное количество мест') ? 'none' : '';
     }
 
-    function onTypeChange() {
-        const type = typeSelect.value;
-        updateVisibility(type);
+    function clearFields() {
         priceInput.value  = '';
         placesInput.value = '';
     }
 
-    onTypeChange();
+    updateVisibility();
 
-    typeSelect.addEventListener('change', onTypeChange);
+    typeSelect.addEventListener('change', () => {
+        updateVisibility();
+        clearFields();
+    });
 });

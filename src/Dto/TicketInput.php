@@ -10,4 +10,7 @@ class TicketInput
     public int $eventId;
     public string $type;
     public ?string $uuid;
+    public string $email;
+    public string $surname;
+    public string $name;
 }

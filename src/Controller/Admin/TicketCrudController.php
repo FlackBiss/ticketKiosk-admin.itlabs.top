@@ -53,5 +53,8 @@ class TicketCrudController extends AbstractCrudController
         yield AssociationField::new('event', 'Мероприятие');
         yield TextField::new('type', 'Тип');
         yield DateTimeField::new('createdAt', 'Дата создания');
+        yield TextField::new('email', 'Email');
+        yield TextField::new('surname', 'Фамилия');
+        yield TextField::new('name', 'Имя');
     }
 }

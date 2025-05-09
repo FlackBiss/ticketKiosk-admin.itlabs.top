@@ -20,7 +20,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ApiResource(
     operations: [
         new Get(),
-        new GetCollection(),
+        new GetCollection(order: ['dateTimeAt' => 'DESC']),
     ],
     normalizationContext: ['groups' => ['news:read']]
 )]

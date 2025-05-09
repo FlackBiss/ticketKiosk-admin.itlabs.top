@@ -31,15 +31,15 @@ class Scheme
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['scheme:read'])]
+    #[Groups(['scheme:read', 'news:read', 'event:read', 'event:reads'])]
     private int $id;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['scheme:read'])]
+    #[Groups(['scheme:read', 'news:read', 'event:read', 'event:reads'])]
     private string $name;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['scheme:read'])]
+    #[Groups(['scheme:read', 'news:read', 'event:read', 'event:reads'])]
     private ?string $image = null;
 
     #[Vich\UploadableField(mapping: 'scheme_images', fileNameProperty: 'image')]
