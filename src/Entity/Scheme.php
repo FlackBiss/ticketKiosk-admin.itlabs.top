@@ -200,7 +200,6 @@ class Scheme
         return $this;
     }
 
-    #[Groups(['scheme:read'])]
     public function getSchemeDataJson(): ?array
     {
         return $this->schemeData;
