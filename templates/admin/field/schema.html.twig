@@ -1,18 +1,37 @@
 {% block _Event_schema_widget %}
-    <div class="form-group">
-        <label class="form-label">Схема зала</label>
-        <div class="ea-field-body">
-            <div class="card p-3 bg-white border mb-4">
-                <div id="controls" class="mb-3">
-                    <button type="button" class="btn btn-primary" id="addChairBtn">Добавить место</button>
-                </div>
-                <div id="canvas-container" class="border rounded">
-                    <canvas id="canvas" style="width: 100%; height: auto; background-color: transparent;"></canvas>
-                </div>
+    <div class="card p-4 bg-white border mb-4">
+        <h5 class="mb-4">Настройка мест и схемы зала</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="placeTypeSelect" class="form-label">Тип места</label>
+                <select class="form-select" id="placeTypeSelect">
+                    <option value="">Выберите тип места</option>
+                </select>
             </div>
+            <div class="col-md-6">
+                <label for="placeTypePrice" class="form-label">Цена места</label>
+                <input type="number" class="form-control" id="placeTypePrice" placeholder="Введите цену">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <button type="button" class="btn btn-success w-100" id="applyPriceBtn">
+                Применить цену для всех мест этого типа
+            </button>
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+            <button type="button" class="btn btn-primary" id="addChairBtn">Добавить место</button>
+            <button type="button" class="btn btn-outline-danger" id="clearSchemeBtn">Очистить схему</button>
+        </div>
+
+        <div id="canvas-container" class="border rounded">
+            <canvas id="canvas" style="width: 100%; height: auto; background-color: transparent;"></canvas>
         </div>
     </div>
 
+    {# Модальное окно выбора места #}
     <div class="modal fade" id="placeSelectModal" tabindex="-1" aria-labelledby="placeSelectModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -21,8 +40,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off">
-                    </select>
+                    <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off"></select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="confirmObject" class="btn btn-primary">Подтвердить</button>
@@ -32,6 +50,7 @@
         </div>
     </div>
 
+    {# Модальное окно информации о месте #}
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -39,8 +58,7 @@
                     <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body" id="infoContent">
-                </div>
+                <div class="modal-body" id="infoContent"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 </div>
@@ -48,6 +66,7 @@
         </div>
     </div>
 
+    {# Модальное окно предупреждения о бронированном месте #}
     <div class="modal fade" id="bookedWarningModal" tabindex="-1" aria-labelledby="bookedWarningModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-warning bg-warning-subtle">
@@ -61,25 +80,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Понятно</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-4" id="place-type-price-editor">
-        <h5>Изменить цену для типа</h5>
-        <div class="row g-3 align-items-end">
-            <div class="col-md-6">
-                <label class="form-label">Тип места</label>
-                <select class="form-select" id="placeTypeSelect">
-                    <option disabled selected value="">Выберите тип</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Новая цена</label>
-                <input type="number" class="form-control" id="placeNewPriceInput" placeholder="Введите цену">
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-success w-100" id="applyNewPriceBtn">Применить</button>
             </div>
         </div>
     </div>

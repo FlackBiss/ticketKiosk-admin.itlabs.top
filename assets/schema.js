@@ -1,5 +1,6 @@
 import {Canvas, Control, Image, Object as FabricObject, Rect, util} from 'fabric';
 import {v4 as uuidv4} from 'uuid';
+import TomSelect from "tom-select/base";
 
 const canvas = new Canvas('canvas', {
     backgroundColor: '#000000',
@@ -30,7 +31,7 @@ async function loadBackgroundImage() {
     const imageName = select.value;
 
     if (!imageName) {
-        alert('No image selected');
+        console.log('No image selected');
         return;
     }
 
@@ -44,7 +45,7 @@ async function loadBackgroundImage() {
         canvas.backgroundColor = null;
         canvas.renderAll();
     } catch (error) {
-        alert('Failed to load background image');
+        console.log('Failed to load background image');
     }
 }
 
@@ -94,7 +95,7 @@ function deleteObject(_eventData, transform) {
 // Show chair info modal
 function showInfoModalForChair(_eventData, transform) {
     const chair = transform.target;
-    const place = places.find(p => p.id == chair.placeData.placeId);
+    const place = chair.placeData;
     const modalElement = document.getElementById('infoModal');
 
     if (!modalElement || !place) {
@@ -188,6 +189,13 @@ async function addChair(e) {
     const modalElement = document.getElementById('placeSelectModal');
     if (modalElement) {
         bootstrap.Modal.getInstance(modalElement).hide();
+    }
+
+    const alreadyExists = [...placeTypeSelect.options].some(opt => opt.value == placeData.id);
+    if (!alreadyExists) {
+        const optionHtml = `<option value="${placeData.id}" data-price="${placeData.price}">${placeData.name}</option>`;
+        placesSelect.insertAdjacentHTML('beforeend', optionHtml);      // селектор в модалке добавления
+        placeTypeSelect.insertAdjacentHTML('beforeend', optionHtml);   // селектор изменения цены
     }
 }
 
@@ -310,13 +318,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         ariaHidden: 'true'
     });
 
+    const placeTypeSelect = document.getElementById('placeTypeSelect');
+    const placeTypePrice = document.getElementById('placeTypePrice');
+    const applyPriceBtn = document.getElementById('applyPriceBtn');
+
+    // Заполняем селект типами мест
+    function populatePlaceTypes() {
+        placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
+
+        const usedPlaceIds = new Set(
+            canvas.getObjects().map(obj => obj.placeData.placeId)
+        );
+
+        places.forEach(place => {
+            if (usedPlaceIds.has(place.id)) {  // Только типы, которые используются на холсте
+                placeTypeSelect.insertAdjacentHTML('beforeend',
+                    `<option value="${place.id}" data-price="${place.price}">${place.name}</option>`);
+            }
+        });
+    }
+
+
+    // Подстановка текущей цены при выборе типа
+    placeTypeSelect.addEventListener('change', (e) => {
+        const selectedOption = e.target.selectedOptions[0];
+        placeTypePrice.value = selectedOption.dataset.price || '';
+    });
+
+    // Применение новой цены ко всем объектам выбранного типа
+    applyPriceBtn.addEventListener('click', () => {
+        const typeId = placeTypeSelect.value;
+        const newPrice = parseFloat(placeTypePrice.value);
+
+        if (!typeId || isNaN(newPrice)) {
+            alert('Выберите тип и введите корректную цену.');
+            return;
+        }
+
+        // Обновляем цену в массиве типов
+        const placeType = places.find(p => p.id == typeId);
+        if (placeType) placeType.price = newPrice;
+
+        // Обновляем цену на canvas
+        canvas.getObjects().forEach(obj => {
+            if (obj.placeData.placeId == typeId) {
+                obj.placeData.price = newPrice;
+            }
+        });
+
+        canvas.requestRenderAll(); // Обновить отрисовку
+        saveData(); // 🔁 Сохраняем новое состояние в поле schemeData
+
+        alert(`Цена для всех мест типа "${placeType.name}" обновлена до ${newPrice}.`);
+    });
+
     places = await (await fetch('/api/places')).json();
 
     const schemeSelect = document.getElementById('Event_scheme');
     const schemeDataField = document.getElementById('Event_schemeData');
 
     schemeSelect?.addEventListener('change', async (e) => {
-        if (!schemeDataField || schemeDataField.value.trim() !== '' && schemeDataField.value !== 'null') {
+        if (!schemeDataField || schemeDataField.value.trim() !== '' && schemeDataField.value !== 'null' && schemeDataField.value !== '[]') {
             console.log('Данные схемы уже есть — не загружаем повторно');
             return;
         }
@@ -400,9 +462,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     updateVisibility();
-
     typeSelect.addEventListener('change', () => {
         updateVisibility();
         clearFields();
+    });
+    populatePlaceTypes();
+
+    const clearSchemeBtn = document.getElementById('clearSchemeBtn');
+
+    clearSchemeBtn?.addEventListener('click', () => {
+        if (!confirm('Вы уверены, что хотите полностью очистить схему? Это действие нельзя отменить.')) return;
+
+        canvas.clear();
+
+        const placeTypeSelect = document.getElementById('placeTypeSelect');
+        const placesSelect = document.getElementById('placesSelect');
+        if (placeTypeSelect) placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
+        if (placesSelect) placesSelect.innerHTML = '';
+
+        const clearButton = document.querySelector('.ts-control .clear-button');
+        if (clearButton) {
+            clearButton.click();
+        }
+
+        const schemeDataField = document.getElementById('Event_schemeData');
+        if (schemeDataField) schemeDataField.value = '';
     });
 });
