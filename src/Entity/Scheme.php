@@ -10,6 +10,7 @@ use App\Repository\SchemeRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -54,6 +55,11 @@ class Scheme
      */
     #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'scheme', orphanRemoval: true)]
     private Collection $events;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $schemeData;
+
+    private string $schemeWidget;
 
     public function __construct()
     {
@@ -169,5 +175,34 @@ class Scheme
         }
 
         return $this;
+    }
+
+    #[Groups(['scheme:read'])]
+    public function getSchemeData(): ?string
+    {
+        return json_encode($this->schemeData, true);
+    }
+
+    public function setSchemeData(?string $schemeData): Scheme
+    {
+        $this->schemeData = json_decode($schemeData);
+        return $this;
+    }
+
+    public function getSchemeWidget(): string
+    {
+        return $this->schemeWidget;
+    }
+
+    public function setSchemeWidget(string $schemeWidget): Scheme
+    {
+        $this->schemeWidget = $schemeWidget;
+        return $this;
+    }
+
+    #[Groups(['scheme:read'])]
+    public function getSchemeDataJson(): ?array
+    {
+        return $this->schemeData;
     }
 }

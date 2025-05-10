@@ -26,18 +26,38 @@ FabricObject.prototype.toObject = (function (toObject) {
 })(FabricObject.prototype.toObject);
 
 async function loadBackgroundImage() {
-    const select = document.getElementById('Event_scheme');
-    const imageName = select.value;
+    const hiddenImageInput = document.getElementById('Scheme_image');
+    const fileInput = document.getElementById('Scheme_imageFile_file');
+    if (hiddenImageInput && hiddenImageInput.value) {
+        var url = `/images/scheme/${hiddenImageInput.value}`;
+        console.log('Загрузка схемы по пути:', url);
+    }
 
-    if (!imageName) {
-        alert('No image selected');
-        return;
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Выбран локальный файл:', file.name);
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    const url = e.target.result;
+                    try {
+                        const img = await Image.fromURL(url);
+                        canvas.backgroundImage = img;
+                        canvas.setDimensions({ width: img.width, height: img.height });
+                        canvas.backgroundColor = null;
+                        canvas.renderAll();
+                    } catch (error) {
+                        alert('Не удалось отобразить выбранное изображение');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 
     try {
-        const response = await fetch(`/api/schemes/${imageName}`);
-        const data = await response.json();
-        const img = await Image.fromURL(data.image, {crossOrigin: 'anonymous'});
+        const img = await Image.fromURL(url, {crossOrigin: 'anonymous'});
 
         canvas.backgroundImage = img;
         canvas.setDimensions({width: img.width, height: img.height});
@@ -193,7 +213,7 @@ async function addChair(e) {
 
 // Save canvas data
 function saveData() {
-    const schemeDataField = document.getElementById('Event_schemeData');
+    const schemeDataField = document.getElementById('Scheme_schemeData');
     const data = canvas.getObjects().map(place => ({
         placeId: place.placeData.placeId,
         uuid: place.placeData.uuid,
@@ -212,7 +232,7 @@ function saveData() {
 
 // Load objects from saved data
 function loadObjects() {
-    const schemeData = document.getElementById('Event_schemeData');
+    const schemeData = document.getElementById('Scheme_schemeData');
 
     if (!schemeData || !schemeData.value || schemeData.value.trim() === '' || schemeData.value === 'null') return;
 
@@ -295,7 +315,8 @@ function loadObjects() {
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
-    const eventScheme = document.getElementById('Event_scheme');
+    const hiddenImageInput = document.getElementById('Scheme_image');
+    const fileInput = document.getElementById('Scheme_imageFile_file');
     const addChairBtn = document.getElementById('addChairBtn');
     const confirmObjectBtn = document.getElementById('confirmObject');
     const cancelObjectBtn = document.getElementById('cancelObject');
@@ -312,31 +333,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     places = await (await fetch('/api/places')).json();
 
-    const schemeSelect = document.getElementById('Event_scheme');
-    const schemeDataField = document.getElementById('Event_schemeData');
-
-    schemeSelect?.addEventListener('change', async (e) => {
-        if (!schemeDataField || schemeDataField.value.trim() !== '' && schemeDataField.value !== 'null') {
-            console.log('Данные схемы уже есть — не загружаем повторно');
-            return;
-        }
-
-        const schemeId = e.target.value;
-        if (!schemeId) return;
-        try {
-            const res = await fetch(`/api/schemes/${schemeId}`);
-            const json = await res.json();
-            if (json.schemeData) {
-                schemeDataField.value = json.schemeData;
-                console.log('Подгрузили данные схемы в Event_schemeData');
-                loadObjects(); // отрисовать
-            }
-        } catch (err) {
-            console.error('Ошибка загрузки schemeData:', err);
-        }
-    });
-
-    eventScheme?.addEventListener('change', loadBackgroundImage);
+    if (hiddenImageInput || fileInput) {
+        await loadBackgroundImage();
+        loadObjects();
+    }
     addChairBtn?.addEventListener('click', showChairModal);
     confirmObjectBtn?.addEventListener('click', addChair);
     cancelObjectBtn?.addEventListener('click', () => {
@@ -374,35 +374,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     submitBtns.forEach(btn => btn.addEventListener('click', saveData));
-
-    if (eventScheme.value) {
-        await loadBackgroundImage();
-        loadObjects();
-    }
-
-    const typeSelect  = document.getElementById('Event_type');
-    const priceInput  = document.getElementById('Event_price');
-    const placesInput = document.getElementById('Event_places');
-    const schemeTabLi = document.querySelector('a[href="#tab-shema-zala"]').closest('li.nav-item');
-    const priceField  = priceInput.closest('.form-group');
-    const placesField = placesInput.closest('.form-group');
-
-    function updateVisibility() {
-        const type = typeSelect.value;
-        schemeTabLi.style.display = type === 'Места согласно билетам' ? '' : 'none';
-        priceField.style.display    = type === 'Места согласно билетам' ? 'none' : '';
-        placesField.style.display   = (type === 'Места согласно билетам' || type === 'Неограниченное количество мест') ? 'none' : '';
-    }
-
-    function clearFields() {
-        priceInput.value  = '';
-        placesInput.value = '';
-    }
-
-    updateVisibility();
-
-    typeSelect.addEventListener('change', () => {
-        updateVisibility();
-        clearFields();
-    });
 });

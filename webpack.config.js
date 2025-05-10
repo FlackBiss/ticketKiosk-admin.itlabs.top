@@ -10,6 +10,7 @@ Encore
     .setPublicPath('/build')
     .addEntry('app', './assets/app.js')
     .addEntry('schema', './assets/schema.js')
+    .addEntry('schemaNew', './assets/schemaNew.js')
     .enableStimulusBridge('./assets/controllers.json')
     .splitEntryChunks()
     .enableSingleRuntimeChunk()
