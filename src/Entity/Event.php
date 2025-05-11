@@ -97,11 +97,19 @@ class Event
     #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $shortDescription = null;
 
+    /**
+     * @var Collection<int, EventImages>
+     */
+    #[ORM\OneToMany(targetEntity: EventImages::class, mappedBy: 'event', cascade: ['all'])]
+    #[Groups(['news:read', 'event:read', 'event:reads'])]
+    private Collection $images;
+
     public function __construct()
     {
         $this->news = new ArrayCollection();
         $this->tickets = new ArrayCollection();
         $this->sessionEvents = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -391,5 +399,35 @@ class Event
         }
 
         return array_values($types);
+    }
+
+    /**
+     * @return Collection<int, EventImages>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(EventImages $image): static
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(EventImages $image): static
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getEvent() === $this) {
+                $image->setEvent(null);
+            }
+        }
+
+        return $this;
     }
 }

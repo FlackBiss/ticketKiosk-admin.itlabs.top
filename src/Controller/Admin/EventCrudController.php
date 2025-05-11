@@ -3,11 +3,13 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Event;
+use App\Entity\EventImages;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\HiddenField;
@@ -83,6 +85,13 @@ class EventCrudController extends AbstractCrudController
 
         yield AssociationField::new('tickets', 'Билеты')
             ->hideOnForm();
+
+        yield CollectionField::new('images', 'Изображения')
+            ->onlyOnForms()
+            ->setRequired(false)
+            ->showEntryLabel(false)
+            ->useEntryCrudForm(EventImagesCrudController::class)
+            ->setColumns(8);
 
         yield FormField::addTab('Схема зала');
         yield AssociationField::new('scheme', 'Схема зала');
