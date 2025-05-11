@@ -106,27 +106,38 @@ function showInfoModalForChair(_eventData, transform) {
     const infoContent = document.getElementById('infoContent');
     if (infoContent) {
         infoContent.innerHTML = `
-            <p><strong>Тип стула:</strong> ${place.name}</p>
+            <p><strong>Секция:</strong> ${place.section}</p>
+            <p><strong>Ряд:</strong> ${place.row}</p>
+            <p><strong>Номер места:</strong> ${place.seatNumber}</p>
+            <p><strong>Тип места:</strong> ${place.name}</p>
             <p><strong>Цена:</strong> ${place.price}</p>
         `;
     }
 
-    const modal = new bootstrap.Modal(modalElement, {
+    bootstrap.Modal.getOrCreateInstance(modalElement, {
         backdrop: 'static',
         keyboard: false
-    });
-    modal.show();
+    }).show();
     return true;
 }
 
 // Add new chair to canvas
 async function addChair(e) {
     e.preventDefault();
+
+    const sectionInput = document.getElementById('seatSectionInput');
+    const rowInput     = document.getElementById('seatRowInput');
+    const numberInput  = document.getElementById('seatNumberInput');
+
     const select = document.getElementById('placesSelect');
     const chairType = select.value;
     const option = select.querySelector(`option[value="${chairType}"]`);
     const fillColor = option.getAttribute('data-color');
     let placeData = places.find(p => p.id == chairType)
+
+    const section = sectionInput.value.trim();
+    const row     = rowInput.value.trim();
+    const number  = numberInput.value.trim();
 
     const chair = new Rect({
         left: 50,
@@ -143,7 +154,10 @@ async function addChair(e) {
             name: placeData.name,
             price: placeData.price,
             color: placeData.color,
-            booked: placeData.booked
+            booked: placeData.booked,
+            section:    section,
+            row:        row,
+            seatNumber: number
         },
         objectCaching: false
     });
@@ -214,6 +228,9 @@ function saveData() {
         width: place.getScaledWidth(),
         height: place.getScaledHeight(),
         booked: place.placeData.booked ?? false,
+        section:    place.placeData.section ?? null,
+        row:        place.placeData.row ?? null,
+        seatNumber: place.placeData.seatNumber ?? null,
     }));
     schemeDataField.value = JSON.stringify(data);
 }
@@ -247,7 +264,10 @@ function loadObjects() {
                 name: place.name,
                 price: place.price,
                 color: place.color,
-                booked: isBooked
+                booked: isBooked,
+                section:    place.section,
+                row:        place.row,
+                seatNumber: place.seatNumber
             },
             objectCaching: false
         });
@@ -389,9 +409,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const res = await fetch(`/api/schemes/${schemeId}`);
             const json = await res.json();
             if (json.schemeData) {
+                canvas.clear();
+
                 schemeDataField.value = json.schemeData;
                 console.log('Подгрузили данные схемы в Event_schemeData');
                 loadObjects(); // отрисовать
+
+                populatePlaceTypes();
             }
         } catch (err) {
             console.error('Ошибка загрузки schemeData:', err);
@@ -487,5 +511,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const schemeDataField = document.getElementById('Event_schemeData');
         if (schemeDataField) schemeDataField.value = '';
+    });
+
+    const placesSelect = document.getElementById('placesSelect');
+    const seatDetails  = document.getElementById('seatDetails');
+    const sectionInput = document.getElementById('seatSectionInput');
+    const rowInput     = document.getElementById('seatRowInput');
+    const numberInput  = document.getElementById('seatNumberInput');
+    const placeModalEl = document.getElementById('placeSelectModal');
+
+// 1) При каждом открытии модалки — сбрасываем селект и скрываем блок
+    placeModalEl.addEventListener('show.bs.modal', () => {
+        placesSelect.value = '';
+        seatDetails.classList.add('d-none');
+        sectionInput.value = '';
+        rowInput.value     = '';
+        numberInput.value  = '';
+    });
+
+// 2) Когда пользователь выбирает тип — показываем блок деталей
+    placesSelect.addEventListener('change', () => {
+        if (placesSelect.value) {
+            seatDetails.classList.remove('d-none');
+        } else {
+            seatDetails.classList.add('d-none');
+        }
     });
 });

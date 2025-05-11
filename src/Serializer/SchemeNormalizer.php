@@ -13,8 +13,7 @@ readonly class SchemeNormalizer implements NormalizerInterface
         #[Autowire(service: 'serializer.normalizer.object')]
         private NormalizerInterface $normalizer,
         private StorageInterface    $storage
-    )
-    {
+    ) {
     }
 
     public function normalize($object, string $format = null, array $context = []): array
@@ -23,6 +22,16 @@ readonly class SchemeNormalizer implements NormalizerInterface
         $data = $this->normalizer->normalize($object, $format, $context);
 
         $data['image'] = $this->storage->resolveUri($object, 'imageFile');
+
+        $path = $this->storage->resolvePath($object, 'imageFile');
+        if ($path && is_file($path) && is_readable($path)) {
+            [$w, $h] = getimagesize($path);
+            $data['imageDimensionX'] = $w;
+            $data['imageDimensionY'] = $h;
+        } else {
+            $data['imageDimensionX'] = null;
+            $data['imageDimensionY'] = null;
+        }
 
         return $data;
     }
@@ -34,8 +43,6 @@ readonly class SchemeNormalizer implements NormalizerInterface
 
     public function getSupportedTypes(?string $format): array
     {
-        return [
-            Scheme::class => true,
-        ];
+        return [ Scheme::class => true ];
     }
 }

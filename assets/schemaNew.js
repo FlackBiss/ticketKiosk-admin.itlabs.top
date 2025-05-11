@@ -114,7 +114,7 @@ function deleteObject(_eventData, transform) {
 // Show chair info modal
 function showInfoModalForChair(_eventData, transform) {
     const chair = transform.target;
-    const place = places.find(p => p.id == chair.placeData.placeId);
+    const place = chair.placeData;
     const modalElement = document.getElementById('infoModal');
 
     if (!modalElement || !place) {
@@ -125,27 +125,38 @@ function showInfoModalForChair(_eventData, transform) {
     const infoContent = document.getElementById('infoContent');
     if (infoContent) {
         infoContent.innerHTML = `
-            <p><strong>Тип стула:</strong> ${place.name}</p>
+            <p><strong>Секция:</strong> ${place.section}</p>
+            <p><strong>Ряд:</strong> ${place.row}</p>
+            <p><strong>Номер места:</strong> ${place.seatNumber}</p>
+            <p><strong>Тип места:</strong> ${place.name}</p>
             <p><strong>Цена:</strong> ${place.price}</p>
         `;
     }
 
-    const modal = new bootstrap.Modal(modalElement, {
+    bootstrap.Modal.getOrCreateInstance(modalElement, {
         backdrop: 'static',
         keyboard: false
-    });
-    modal.show();
+    }).show();
     return true;
 }
 
 // Add new chair to canvas
 async function addChair(e) {
     e.preventDefault();
+
+    const sectionInput = document.getElementById('seatSectionInput');
+    const rowInput     = document.getElementById('seatRowInput');
+    const numberInput  = document.getElementById('seatNumberInput');
+
     const select = document.getElementById('placesSelect');
     const chairType = select.value;
     const option = select.querySelector(`option[value="${chairType}"]`);
     const fillColor = option.getAttribute('data-color');
     let placeData = places.find(p => p.id == chairType)
+
+    const section = sectionInput.value.trim();
+    const row     = rowInput.value.trim();
+    const number  = numberInput.value.trim();
 
     const chair = new Rect({
         left: 50,
@@ -162,7 +173,10 @@ async function addChair(e) {
             name: placeData.name,
             price: placeData.price,
             color: placeData.color,
-            booked: placeData.booked
+            booked: placeData.booked,
+            section:    section,
+            row:        row,
+            seatNumber: number
         },
         objectCaching: false
     });
@@ -209,6 +223,13 @@ async function addChair(e) {
     if (modalElement) {
         bootstrap.Modal.getInstance(modalElement).hide();
     }
+
+    const alreadyExists = [...placeTypeSelect.options].some(opt => opt.value == placeData.id);
+    if (!alreadyExists) {
+        const optionHtml = `<option value="${placeData.id}" data-price="${placeData.price}">${placeData.name}</option>`;
+        placesSelect.insertAdjacentHTML('beforeend', optionHtml);      // селектор в модалке добавления
+        placeTypeSelect.insertAdjacentHTML('beforeend', optionHtml);   // селектор изменения цены
+    }
 }
 
 // Save canvas data
@@ -226,6 +247,9 @@ function saveData() {
         width: place.getScaledWidth(),
         height: place.getScaledHeight(),
         booked: place.placeData.booked ?? false,
+        section:    place.placeData.section ?? null,
+        row:        place.placeData.row ?? null,
+        seatNumber: place.placeData.seatNumber ?? null,
     }));
     schemeDataField.value = JSON.stringify(data);
 }
@@ -259,7 +283,10 @@ function loadObjects() {
                 name: place.name,
                 price: place.price,
                 color: place.color,
-                booked: isBooked
+                booked: isBooked,
+                section:    place.section,
+                row:        place.row,
+                seatNumber: place.seatNumber
             },
             objectCaching: false
         });
@@ -331,12 +358,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         ariaHidden: 'true'
     });
 
+    const placeTypeSelect = document.getElementById('placeTypeSelect');
+    const placeTypePrice = document.getElementById('placeTypePrice');
+    const applyPriceBtn = document.getElementById('applyPriceBtn');
+
+    // Заполняем селект типами мест
+    function populatePlaceTypes() {
+        placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
+
+        const usedPlaceIds = new Set(
+            canvas.getObjects().map(obj => obj.placeData.placeId)
+        );
+
+        places.forEach(place => {
+            if (usedPlaceIds.has(place.id)) {  // Только типы, которые используются на холсте
+                placeTypeSelect.insertAdjacentHTML('beforeend',
+                    `<option value="${place.id}" data-price="${place.price}">${place.name}</option>`);
+            }
+        });
+    }
+
+
+    // Подстановка текущей цены при выборе типа
+    placeTypeSelect.addEventListener('change', (e) => {
+        const selectedOption = e.target.selectedOptions[0];
+        placeTypePrice.value = selectedOption.dataset.price || '';
+    });
+
+    // Применение новой цены ко всем объектам выбранного типа
+    applyPriceBtn.addEventListener('click', () => {
+        const typeId = placeTypeSelect.value;
+        const newPrice = parseFloat(placeTypePrice.value);
+
+        if (!typeId || isNaN(newPrice)) {
+            alert('Выберите тип и введите корректную цену.');
+            return;
+        }
+
+        // Обновляем цену в массиве типов
+        const placeType = places.find(p => p.id == typeId);
+        if (placeType) placeType.price = newPrice;
+
+        // Обновляем цену на canvas
+        canvas.getObjects().forEach(obj => {
+            if (obj.placeData.placeId == typeId) {
+                obj.placeData.price = newPrice;
+            }
+        });
+
+        canvas.requestRenderAll(); // Обновить отрисовку
+        saveData(); // 🔁 Сохраняем новое состояние в поле schemeData
+
+        alert(`Цена для всех мест типа "${placeType.name}" обновлена до ${newPrice}.`);
+    });
+
     places = await (await fetch('/api/places')).json();
 
     if (hiddenImageInput || fileInput) {
         await loadBackgroundImage();
         loadObjects();
     }
+
     addChairBtn?.addEventListener('click', showChairModal);
     confirmObjectBtn?.addEventListener('click', addChair);
     cancelObjectBtn?.addEventListener('click', () => {
@@ -374,4 +456,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     submitBtns.forEach(btn => btn.addEventListener('click', saveData));
+
+    populatePlaceTypes();
+
+    const clearSchemeBtn = document.getElementById('clearSchemeBtn');
+
+    clearSchemeBtn?.addEventListener('click', () => {
+        if (!confirm('Вы уверены, что хотите полностью очистить схему? Это действие нельзя отменить.')) return;
+
+        canvas.clear();
+
+        const placeTypeSelect = document.getElementById('placeTypeSelect');
+        const placesSelect = document.getElementById('placesSelect');
+        if (placeTypeSelect) placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
+        if (placesSelect) placesSelect.innerHTML = '';
+
+        const clearButton = document.querySelector('.ts-control .clear-button');
+        if (clearButton) {
+            clearButton.click();
+        }
+
+        const schemeDataField = document.getElementById('Scheme_schemeData');
+        if (schemeDataField) schemeDataField.value = '';
+    });
+
+    const placesSelect = document.getElementById('placesSelect');
+    const seatDetails  = document.getElementById('seatDetails');
+    const sectionInput = document.getElementById('seatSectionInput');
+    const rowInput     = document.getElementById('seatRowInput');
+    const numberInput  = document.getElementById('seatNumberInput');
+    const placeModalEl = document.getElementById('placeSelectModal');
+
+// 1) При каждом открытии модалки — сбрасываем селект и скрываем блок
+    placeModalEl.addEventListener('show.bs.modal', () => {
+        placesSelect.value = '';
+        seatDetails.classList.add('d-none');
+        sectionInput.value = '';
+        rowInput.value     = '';
+        numberInput.value  = '';
+    });
+
+// 2) Когда пользователь выбирает тип — показываем блок деталей
+    placesSelect.addEventListener('change', () => {
+        if (placesSelect.value) {
+            seatDetails.classList.remove('d-none');
+        } else {
+            seatDetails.classList.add('d-none');
+        }
+    });
 });

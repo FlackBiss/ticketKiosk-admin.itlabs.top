@@ -36,11 +36,29 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="placeSelectModalLabel">Выберите объект</h5>
+                    <h5 class="modal-title" id="placeSelectModalLabel">Добавить место</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off"></select>
+                    <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off">
+                        <option value="">Выберите тип места</option>
+                    </select>
+
+                    <!-- Детали места: показывается после выбора типа -->
+                    <div id="seatDetails" class="d-none">
+                        <div class="mb-3">
+                            <label for="seatSectionInput" class="form-label">Секция</label>
+                            <input type="text" class="form-control" id="seatSectionInput" placeholder="Например, A">
+                        </div>
+                        <div class="mb-3">
+                            <label for="seatRowInput" class="form-label">Ряд</label>
+                            <input type="text" class="form-control" id="seatRowInput" placeholder="Например, 5">
+                        </div>
+                        <div class="mb-3">
+                            <label for="seatNumberInput" class="form-label">Номер места</label>
+                            <input type="text" class="form-control" id="seatNumberInput" placeholder="Например, 12">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="confirmObject" class="btn btn-primary">Подтвердить</button>

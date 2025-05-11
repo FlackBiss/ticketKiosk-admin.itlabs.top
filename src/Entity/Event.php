@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
@@ -355,7 +356,7 @@ class Event
     public function getStartPrice(): int
     {
         $basePrice = $this->getPrice();
-        $schemePrices = array_column((array) $this->getSchemeDataJson(), 'price');
+        $schemePrices = array_column((array)$this->getSchemeDataJson(), 'price');
 
         $prices = array_filter(
             array_merge([$basePrice], $schemePrices),
@@ -367,5 +368,28 @@ class Event
         }
 
         return min($prices);
+    }
+
+    #[Groups(['event:reads'])]
+    public function getTypesPlaces(): ?array
+    {
+        if (empty($this->getSchemeDataJson())) {
+            return null;
+        }
+
+        $types = [];
+        foreach ($this->getSchemeDataJson() as $item) {
+            $id = $item['placeId'];
+            if (!isset($types[$id])) {
+                $types[$id] = [
+                    'placeId' => $id,
+                    'name'    => $item['name'],
+                    'color'   => $item['color'],
+                    'price'   => $item['price'],
+                ];
+            }
+        }
+
+        return array_values($types);
     }
 }
