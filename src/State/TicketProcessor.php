@@ -28,15 +28,15 @@ readonly class TicketProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Ticket
     {
-        if ($this->eventRepository->find($data->eventId) === null)
+        $event = $this->eventRepository->find($data->eventId);
+
+        if (!$event)
         {
             throw new \Exception('По введённому id, мероприятия не существует');
         }
 
         if ($data->uuid)
         {
-            $event = $this->eventRepository->find($data->eventId);
-
             $schemeData = $event->getSchemeDataJson();
 
             foreach ($schemeData as &$value) {
@@ -51,7 +51,6 @@ readonly class TicketProcessor implements ProcessorInterface
         }
 
         $ticket = new Ticket();
-        $event = $this->eventRepository->find($data->eventId);
 
         $ticket
             ->setPlace($data->place)

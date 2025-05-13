@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Terminal;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -26,10 +27,27 @@ class TerminalCrudController extends AbstractCrudController
             ->setPageTitle(Crud::PAGE_EDIT, 'Изменение терминала');
     }
 
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets
+            ->addJsFile('js/auto_update_kkt_network.js');
+    }
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id', 'ID')->hideOnForm();
         yield TextField::new('title', 'Название терминала');
+
+        yield TextField::new('ipAddress', 'IP-адрес')
+            ->setColumns(3);
+
+        yield TextField::new('isNetworkStringify', 'В сети')
+            ->renderAsHtml()
+            ->onlyOnIndex();
+
+        yield TextField::new('isKktStringify', 'Есть бумага')
+            ->renderAsHtml()
+            ->onlyOnIndex();
 
         yield AssociationField::new('sessions', 'Сессии')->hideOnForm();
         yield AssociationField::new('exceptionLogs', 'Исключения')->hideOnForm();

@@ -5,12 +5,16 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model;
+use App\Controller\Terminal\ChangeController;
 use App\Entity\Traits\CreatedAtTrait;
 use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\TerminalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\HasLifecycleCallbacks]
@@ -18,11 +22,35 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(),
-        new GetCollection(),
     ],
     normalizationContext: ['groups' => 'terminal:read'],
     paginationEnabled: false
 )]
+#[UniqueEntity(fields: ['ipAddress'])]
+#[Post(
+    uriTemplate: 'terminals/edit',
+    controller: ChangeController::class,
+    openapi: new Model\Operation(
+        requestBody: new Model\RequestBody(
+            content: new \ArrayObject([
+                'application/json' => [
+                    'schema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'id' => [
+                                'type' => 'integer',
+                            ],
+                            'kkt' => [
+                                'type' => 'boolean',
+                            ],
+                        ],
+                    ]
+                ]
+            ])
+        )
+    ),
+    deserialize: false)]
+#[GetCollection(normalizationContext: ['groups' => ['terminal:read']])]
 class Terminal
 {
     use CreatedAtTrait;
@@ -37,6 +65,18 @@ class Terminal
     #[ORM\Column(length: 255)]
     #[Groups('terminal:read')]
     private ?string $title = null;
+
+    #[ORM\Column]
+    #[Groups('terminal:read')]
+    private ?bool $network = false;
+
+    #[ORM\Column]
+    #[Groups('terminal:read')]
+    private ?bool $kkt = false;
+
+    #[ORM\Column(length: 255)]
+    #[Groups('terminal:read')]
+    private ?string $ipAddress = null;
 
     #[ORM\OneToMany(targetEntity: Sessions::class, mappedBy: 'terminal', cascade: ['persist', 'remove'])]
     private Collection $sessions;
@@ -70,6 +110,58 @@ class Terminal
         $this->title = $title;
 
         return $this;
+    }
+
+    public function isNetwork(): ?bool
+    {
+        return $this->network;
+    }
+
+    public function setNetwork(bool $network): static
+    {
+        $this->network = $network;
+
+        return $this;
+    }
+
+    public function isKkt(): ?bool
+    {
+        return $this->kkt;
+    }
+
+    public function setKkt(bool $kkt): static
+    {
+        $this->kkt = $kkt;
+
+        return $this;
+    }
+
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    public function setIpAddress(string $ipAddress): static
+    {
+        $this->ipAddress = $ipAddress;
+
+        return $this;
+    }
+
+    public function getIsNetworkStringify(): string
+    {
+        $style = 'color: ';
+        $style .= $this->isNetwork() ? 'green' : 'red';
+        $text = $this->isNetwork() ? 'Да' : 'Нет';
+        return "<div style='$style'>$text</div>";
+    }
+
+    public function getIsKktStringify(): string
+    {
+        $style = 'color: ';
+        $style .= $this->isKkt() ? 'green' : 'red';
+        $text = $this->isKkt() ? 'Да' : 'Нет';
+        return "<div style='$style'>$text</div>";
     }
 
     /**
