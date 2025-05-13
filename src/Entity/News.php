@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model;
+use App\Controller\News\NewsController;
+use App\Controller\Terminal\ChangeController;
 use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\NewsRepository;
 use DateTime;
@@ -19,11 +23,46 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
-        new Get(),
         new GetCollection(order: ['dateTimeAt' => 'DESC']),
     ],
     normalizationContext: ['groups' => ['news:read']]
 )]
+#[Post(
+    controller: NewsController::class,
+    openapi: new Model\Operation(
+        requestBody: new Model\RequestBody(
+            content: new \ArrayObject([
+                'multipart/form-data' => [
+                    'schema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'imageFile' => [
+                                'type' => 'string',
+                                'format' => 'binary',
+                            ],
+                            'title' => [
+                                'type' => 'string',
+                            ],
+                            'description' => [
+                                'type' => 'string',
+                            ],
+                            'dateTimeAt' => [
+                                'type' => 'datetime',
+                            ],
+                            'shortDescription' => [
+                                'type' => 'string',
+                            ],
+                            'eventId' => [
+                                'type' => 'integer',
+                            ],
+                        ]
+                    ]
+                ]
+            ])
+        )
+    ),
+    deserialize: false)]
+#[Get]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 class News
 {

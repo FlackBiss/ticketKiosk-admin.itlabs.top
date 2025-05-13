@@ -16,6 +16,24 @@ class NewsRepository extends ServiceEntityRepository
         parent::__construct($registry, News::class);
     }
 
+    public function save(News $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(News $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return News[] Returns an array of News objects
 //     */
