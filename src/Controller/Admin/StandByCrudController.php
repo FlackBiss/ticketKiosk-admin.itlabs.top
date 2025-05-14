@@ -4,7 +4,6 @@ namespace App\Controller\Admin;
 
 use App\Controller\Admin\Field\VichFileField;
 use App\Entity\StandBy;
-use App\Repository\StandByRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -16,13 +15,6 @@ class StandByCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return StandBy::class;
-    }
-
-
-    public function __construct(
-        protected readonly StandByRepository $standByRepository
-    )
-    {
     }
 
     public function configureCrud(Crud $crud): Crud

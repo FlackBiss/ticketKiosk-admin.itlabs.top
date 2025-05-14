@@ -27,41 +27,6 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
     ],
     normalizationContext: ['groups' => ['news:read']]
 )]
-#[Post(
-    controller: NewsController::class,
-    openapi: new Model\Operation(
-        requestBody: new Model\RequestBody(
-            content: new \ArrayObject([
-                'multipart/form-data' => [
-                    'schema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'imageFile' => [
-                                'type' => 'string',
-                                'format' => 'binary',
-                            ],
-                            'title' => [
-                                'type' => 'string',
-                            ],
-                            'description' => [
-                                'type' => 'string',
-                            ],
-                            'dateTimeAt' => [
-                                'type' => 'datetime',
-                            ],
-                            'shortDescription' => [
-                                'type' => 'string',
-                            ],
-                            'eventId' => [
-                                'type' => 'integer',
-                            ],
-                        ]
-                    ]
-                ]
-            ])
-        )
-    ),
-    deserialize: false)]
 #[Get]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 class News

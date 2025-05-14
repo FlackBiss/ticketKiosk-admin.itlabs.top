@@ -54,7 +54,6 @@ readonly class SessionsProcessor implements ProcessorInterface
             $event = new SessionEvents();
 
             $event
-                ->setDateAt($item->time)
                 ->setObjectName($item->objectName)
                 ->setDateAt($item->dateAt)
                 ->setCoordinates($item->coordinates)
