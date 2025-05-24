@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Event;
 use App\Entity\Ticket;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Types\Types;
@@ -35,22 +36,21 @@ class TicketRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @return Ticket[]
-     */
-    public function findByDateInterval(\DateTimeInterface $from, \DateTimeInterface $to): array
+    public function findByDateInterval(\DateTimeInterface $from, \DateTimeInterface $to, ?Event $event = null): array
     {
-        // клонируем, чтобы не менять оригинальные объекты
-        $fromDate = (clone $from)->setTime(0, 0, 0);
-        $toDate   = (clone $to)->setTime(23, 59, 59);
-
-        return $this->createQueryBuilder('t')
+        $qb = $this->createQueryBuilder('t')
+            ->leftJoin('t.event', 'e')
+            ->addSelect('e')
             ->andWhere('t.createdAt BETWEEN :from AND :to')
-            ->setParameter('from', $fromDate, Types::DATETIME_MUTABLE)
-            ->setParameter('to',   $toDate,   Types::DATETIME_MUTABLE)
-            ->orderBy('t.createdAt', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->setParameter('from', $from)
+            ->setParameter('to', $to);
+
+        if ($event) {
+            $qb->andWhere('t.event = :event')
+                ->setParameter('event', $event);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     //    /**

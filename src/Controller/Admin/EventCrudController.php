@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\Admin\Field\VichImageField;
 use App\Entity\Event;
 use App\Entity\EventImages;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -86,12 +87,10 @@ class EventCrudController extends AbstractCrudController
         yield AssociationField::new('tickets', 'Билеты')
             ->hideOnForm();
 
-        yield CollectionField::new('images', 'Изображения')
-            ->onlyOnForms()
+        yield VichImageField::new('imageFile', 'Изображение')
             ->setRequired(false)
-            ->showEntryLabel(false)
-            ->useEntryCrudForm(EventImagesCrudController::class)
-            ->setColumns(8);
+            ->setFormTypeOption('allow_delete', false)
+            ->onlyOnForms();
 
         yield FormField::addTab('Схема зала');
         yield AssociationField::new('scheme', 'Схема зала');

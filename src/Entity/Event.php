@@ -2,20 +2,24 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Controller\Event\EventController;
+use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\EventRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
+#[Vich\Uploadable]
+#[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
         new GetCollection(order: ['dateTimeAt' => 'DESC'], filters: ['app.event_date_filter', 'app.event_title_filter', 'app.event_type_filter', 'app.event_scheme_filter']),
@@ -27,6 +31,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
 {
+    use UpdatedAtTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -97,19 +103,19 @@ class Event
     #[Groups(['news:read', 'event:read', 'event:reads'])]
     private ?string $shortDescription = null;
 
-    /**
-     * @var Collection<int, EventImages>
-     */
-    #[ORM\OneToMany(targetEntity: EventImages::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['news:read', 'event:read', 'event:reads'])]
-    private Collection $images;
+    private ?string $image = null;
+
+    #[Vich\UploadableField(mapping: 'event_images', fileNameProperty: 'image')]
+    #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])]
+    private ?File $imageFile = null;
 
     public function __construct()
     {
         $this->news = new ArrayCollection();
         $this->tickets = new ArrayCollection();
         $this->sessionEvents = new ArrayCollection();
-        $this->images = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -401,31 +407,28 @@ class Event
         return array_values($types);
     }
 
-    /**
-     * @return Collection<int, EventImages>
-     */
-    public function getImages(): Collection
+    public function getImage(): ?string
     {
-        return $this->images;
+        return $this->image;
     }
 
-    public function addImage(EventImages $image): static
+    public function setImage(?string $image): static
     {
-        if (!$this->images->contains($image)) {
-            $this->images->add($image);
-            $image->setEvent($this);
-        }
+        $this->image = $image;
 
         return $this;
     }
 
-    public function removeImage(EventImages $image): static
+    public function getImageFile(): ?File
     {
-        if ($this->images->removeElement($image)) {
-            // set the owning side to null (unless already changed)
-            if ($image->getEvent() === $this) {
-                $image->setEvent(null);
-            }
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile): self
+    {
+        $this->imageFile = $imageFile;
+        if (null !== $imageFile) {
+            $this->updatedAt = new DateTime();
         }
 
         return $this;

@@ -2,7 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Event;
 use App\Entity\Model\DateTimeRangeModel;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -30,6 +32,16 @@ class DateTimeRangeType extends AbstractType
                     'placeholder' => 'Дата окончания',
                 ],
                 'label'  => 'По',
+            ])
+            ->add('event', EntityType::class, [
+                'class' => Event::class,
+                'choice_label' => 'title',
+                'required' => false,
+                'placeholder' => 'Все мероприятия',
+                'attr' => [
+                    'class' => 'form-select',
+                ],
+                'label' => 'Мероприятие',
             ]);
     }
 

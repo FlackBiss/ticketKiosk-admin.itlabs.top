@@ -4,6 +4,7 @@ namespace App\Controller\Charts;
 
 use App\Entity\Model\DateTimeRangeModel;
 use App\Form\DateTimeRangeType;
+use App\Repository\EventRepository;
 use App\Repository\TicketRepository;
 use DateInterval;
 use DatePeriod;
@@ -40,33 +41,39 @@ class TicketsChartsController extends AbstractController
         TicketRepository $ticketRepo,
         Request $request
     ): Response {
-        //статистика за текущий месяц по дефолту
         $dateFrom = new \DateTime('first day of this month 00:00');
         $dateTo = new \DateTime('last day of this month 23:59');
 
-
-        //Получим сабмит форму с датами
         $form = $this->createForm(DateTimeRangeType::class);
         $form->handleRequest($request);
+
+        $event = null;
+
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var DateTimeRangeModel $dateSubmit */
             $dateSubmit = $form->getData();
-
             $dateFrom = $dateSubmit->getDateFrom();
             $dateTo = $dateSubmit->getDateTo();
+            $event = $dateSubmit->getEvent();
         }
 
-        // 5) Собираем статистику по билетам
-        $tickets = $ticketRepo->findByDateInterval($dateFrom, $dateTo);
+        $tickets = $ticketRepo->findByDateInterval($dateFrom, $dateTo, $event);
 
-        $raw         = [];
-        $types       = [];
+        $date = (new DateTimeRangeModel())
+            ->setDateFrom($dateFrom)
+            ->setDateTo($dateTo)
+            ->setEvent($event);
+
+        $raw = [];
+        $types = [];
         $statsByType = [];
+        $statsByEvent = [];
 
         foreach ($tickets as $t) {
-            $day   = $t->getCreatedAt()->format('d.m.Y');
-            $type  = $t->getType();
+            $day = $t->getCreatedAt()->format('d.m.Y');
+            $type = $t->getType();
             $price = $t->getPrice();
+            $event = $t->getEvent()?->getTitle() ?? 'Без ивента';
 
             $types[$type] = $type;
             $raw[$day][$type] = ($raw[$day][$type] ?? 0) + 1;
@@ -76,16 +83,24 @@ class TicketsChartsController extends AbstractController
             }
             $statsByType[$type]['count']++;
             $statsByType[$type]['totalPrice'] += $price;
+
+            if (!isset($statsByEvent[$event])) {
+                $statsByEvent[$event] = ['count' => 0, 'totalPrice' => 0];
+            }
+            $statsByEvent[$event]['count']++;
+            $statsByEvent[$event]['totalPrice'] += $price;
         }
 
-        foreach ($statsByType as $type => $stats) {
-            $statsByType[$type]['avgPrice'] = round($stats['totalPrice'] / max($stats['count'], 1), 2);
+        foreach ($statsByType as $type => &$stats) {
+            $stats['avgPrice'] = round($stats['totalPrice'] / max($stats['count'], 1), 2);
+        }
+        foreach ($statsByEvent as $event => &$stats) {
+            $stats['avgPrice'] = round($stats['totalPrice'] / max($stats['count'], 1), 2);
         }
 
-        // 6) Подготовка данных для графика
-        $labels  = $this->getDatesFromRange($dateFrom, $dateTo);
+        $labels = $this->getDatesFromRange($dateFrom, $dateTo);
         $datasets = [];
-        $palette  = [
+        $palette = [
             'rgb(255, 99, 132)',
             'rgb(54, 162, 235)',
             'rgb(255, 205, 86)',
@@ -102,63 +117,58 @@ class TicketsChartsController extends AbstractController
 
             $color = $palette[$i % count($palette)];
             $datasets[] = [
-                'label'           => $type,
-                'data'            => $data,
+                'label' => $type,
+                'data' => $data,
                 'backgroundColor' => $color,
-                'borderColor'     => $color,
+                'borderColor' => $color,
             ];
             $i++;
         }
 
         $chart = $chartBuilder->createChart(Chart::TYPE_BAR);
         $chart->setData([
-            'labels'   => $labels,
+            'labels' => $labels,
             'datasets' => $datasets,
         ]);
         $chart->setOptions([
-            'responsive'          => true,
+            'responsive' => true,
             'maintainAspectRatio' => false,
-            'plugins'             => [
-                'title'   => [
+            'plugins' => [
+                'title' => [
                     'display' => true,
-                    'text'    => sprintf(
-                        'Продажи билетов по типам: %s — %s',
-                        $dateFrom->format('d.m.Y'),
-                        $dateTo->format('d.m.Y')
-                    ),
+                    'text' => sprintf('Продажи билетов по типам: %s — %s', $dateFrom->format('d.m.Y'), $dateTo->format('d.m.Y')),
                 ],
-                'legend'  => ['position' => 'top'],
+                'legend' => ['position' => 'top'],
                 'tooltip' => ['enabled' => true],
             ],
-            'scales'              => [
+            'scales' => [
                 'x' => ['ticks' => ['autoSkip' => true, 'maxRotation' => 45]],
                 'y' => ['beginAtZero' => true],
             ],
         ]);
 
-        $date = (new DateTimeRangeModel())
-            ->setDateFrom($dateFrom)
-            ->setDateTo($dateTo);
-
         $form = $this->createForm(DateTimeRangeType::class, $date);
         return $this->render('admin/field/tickets_charts.html.twig', [
-            'form'        => $form->createView(),
-            'chart'       => $chart,
+            'form' => $form->createView(),
+            'chart' => $chart,
             'statsByType' => $statsByType,
+            'statsByEvent' => $statsByEvent,
         ]);
     }
 
     #[Route('/stats/ticket/export', name: 'app_stats_ticket_export')]
     public function exportToExcel(
         TicketRepository $ticketRepo,
+        EventRepository $eventRepo,
         Request $request
     ): Response {
         $data = $request->request->all('date_time_range');
 
         $dateFrom = \DateTime::createFromFormat('Y-m-d', $data['dateFrom'] ?? '') ?: new \DateTime('first day of this month 00:00');
         $dateTo = \DateTime::createFromFormat('Y-m-d', $data['dateTo'] ?? '') ?: new \DateTime('last day of this month 23:59');
+        $event = !empty($data['event']) ? $eventRepo->find($data['event']) : null;
 
-        $tickets = $ticketRepo->findByDateInterval($dateFrom, $dateTo);
+        $tickets = $ticketRepo->findByDateInterval($dateFrom, $dateTo, $event);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -166,14 +176,9 @@ class TicketsChartsController extends AbstractController
 
         $headerStyle = [
             'font' => ['bold' => true],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['argb' => 'FFEFEFEF'],
-            ],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFEFEFEF']],
             'alignment' => ['horizontal' => 'center'],
-            'borders' => [
-                'allBorders' => ['borderStyle' => 'thin'],
-            ],
+            'borders' => ['allBorders' => ['borderStyle' => 'thin']],
         ];
         $cellStyle = [
             'borders' => ['allBorders' => ['borderStyle' => 'thin']],
@@ -191,22 +196,24 @@ class TicketsChartsController extends AbstractController
         $sheet->getStyle('A2')->getFont()->setItalic(true);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal('left');
 
-        $sheet->fromArray(['Дата', 'Тип', 'Цена'], NULL, 'A4');
-        $sheet->getStyle('A4:C4')->applyFromArray($headerStyle);
+        $sheet->fromArray(['Дата', 'Тип', 'Ивент', 'Цена'], NULL, 'A4');
+        $sheet->getStyle('A4:D4')->applyFromArray($headerStyle);
 
         $row = 5;
         $statsByType = [];
+        $statsByEvent = [];
 
         foreach ($tickets as $ticket) {
             $type = $ticket->getType();
             $price = $ticket->getPrice();
+            $event = $ticket->getEvent()?->getTitle() ?? '—';
 
             $sheet->setCellValue("A$row", $ticket->getCreatedAt()->format('d.m.Y'));
             $sheet->setCellValue("B$row", $type);
-            $sheet->setCellValue("C$row", $price);
-
-            $sheet->getStyle("A$row:C$row")->applyFromArray($cellStyle);
-            $sheet->getStyle("C$row")->getNumberFormat()->setFormatCode($currencyFormat);
+            $sheet->setCellValue("C$row", $event);
+            $sheet->setCellValue("D$row", $price);
+            $sheet->getStyle("A$row:D$row")->applyFromArray($cellStyle);
+            $sheet->getStyle("D$row")->getNumberFormat()->setFormatCode($currencyFormat);
             $row++;
 
             if (!isset($statsByType[$type])) {
@@ -214,6 +221,12 @@ class TicketsChartsController extends AbstractController
             }
             $statsByType[$type]['count']++;
             $statsByType[$type]['totalPrice'] += $price;
+
+            if (!isset($statsByEvent[$event])) {
+                $statsByEvent[$event] = ['count' => 0, 'totalPrice' => 0];
+            }
+            $statsByEvent[$event]['count']++;
+            $statsByEvent[$event]['totalPrice'] += $price;
         }
 
         $row += 2;
@@ -233,6 +246,32 @@ class TicketsChartsController extends AbstractController
             $avg = round($sum / max($count, 1), 2);
 
             $sheet->setCellValue("A$row", $type);
+            $sheet->setCellValue("B$row", $count);
+            $sheet->setCellValue("C$row", $avg);
+            $sheet->setCellValue("D$row", $sum);
+
+            $sheet->getStyle("A$row:D$row")->applyFromArray($cellStyle);
+            $sheet->getStyle("C$row:D$row")->getNumberFormat()->setFormatCode($currencyFormat);
+            $row++;
+        }
+
+        $row += 2;
+        $sheet->setCellValue("A$row", 'Итоговая сводка по ивентам');
+        $sheet->mergeCells("A$row:D$row");
+        $sheet->getStyle("A$row")->getFont()->setBold(true)->setSize(12);
+        $sheet->getRowDimension($row)->setRowHeight(20);
+        $row++;
+
+        $sheet->fromArray(['Ивент', 'Продано', 'Средняя цена', 'Сумма'], NULL, "A$row");
+        $sheet->getStyle("A$row:D$row")->applyFromArray($headerStyle);
+        $row++;
+
+        foreach ($statsByEvent as $event => $data) {
+            $count = $data['count'];
+            $sum = $data['totalPrice'];
+            $avg = round($sum / max($count, 1), 2);
+
+            $sheet->setCellValue("A$row", $event);
             $sheet->setCellValue("B$row", $count);
             $sheet->setCellValue("C$row", $avg);
             $sheet->setCellValue("D$row", $sum);

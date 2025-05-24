@@ -12,22 +12,22 @@
 {% endblock %}
 
 {% block page_content %}
-    <div class="ticket-stats-page container pt-3 pb-5">
-        <div class="text-center mb-4">
+    <div class="container ticket-stats-page pt-4 pb-5">
+        <header class="text-center mb-4">
             <h1 class="display-5">Статистика по типам билетов</h1>
-            <p class="text-muted">Выберите диапазон дат для отображения данных</p>
-        </div>
+            <p class="text-muted">Выберите диапазон дат для отображения статистики</p>
+        </header>
 
-        <div class="filter-card mb-4 shadow-sm card p-4">
+        <section class="card shadow-sm p-4 mb-5">
             {{ form_start(form) }}
             <div class="row gy-3 gx-4 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label">С даты</label>
-                    {{ form_widget(form.dateFrom, { attr: { class: 'form-control' } }) }}
+                    <label for="dateFrom" class="form-label">С даты</label>
+                    {{ form_widget(form.dateFrom, { attr: { class: 'form-control', id: 'dateFrom' } }) }}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">По дату</label>
-                    {{ form_widget(form.dateTo, { attr: { class: 'form-control' } }) }}
+                    <label for="dateTo" class="form-label">По дату</label>
+                    {{ form_widget(form.dateTo, { attr: { class: 'form-control', id: 'dateTo' } }) }}
                 </div>
                 <div class="col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary flex-fill">Показать</button>
@@ -42,34 +42,37 @@
                 </div>
             </div>
             {{ form_end(form) }}
-        </div>
+        </section>
 
-        <div class="chart-card mb-5 shadow-sm">
+        <section class="card shadow-sm mb-5">
             <div class="card-header bg-white">
-                <h5 class="mb-0">Диаграмма продаж</h5>
+                <h5 class="mb-0">Диаграмма продаж по дням</h5>
             </div>
             <div class="card-body position-relative" style="height: 400px;">
                 {{ render_chart(chart) }}
             </div>
-        </div>
+        </section>
 
-        {% if statsByType is defined %}
-            <div class="row g-4">
-                {% for type, stats in statsByType %}
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="stats-card h-100">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">{{ type }}</h5>
-                                <ul class="list-unstyled mt-3 mb-0">
-                                    <li><strong>Продано:</strong> {{ stats.count }}</li>
-                                    <li><strong>Средняя цена:</strong> {{ stats.avgPrice }} ₽</li>
-                                    <li><strong>Сумма:</strong> {{ stats.totalPrice }} ₽</li>
-                                </ul>
+        {% if statsByEvent is defined and statsByEvent|length > 0 %}
+            <section>
+                <h4 class="mb-4">Статистика по ивентам</h4>
+                <div class="row g-4">
+                    {% for event, stats in statsByEvent %}
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-truncate" title="{{ event }}">{{ event }}</h5>
+                                    <ul class="list-unstyled mt-3 mb-0">
+                                        <li><strong>Продано:</strong> {{ stats.count }}</li>
+                                        <li><strong>Средняя цена:</strong> {{ stats.avgPrice|number_format(2, '.', ' ') }} ₽</li>
+                                        <li><strong>Сумма:</strong> {{ stats.totalPrice|number_format(2, '.', ' ') }} ₽</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
+            </section>
         {% endif %}
     </div>
 {% endblock %}
