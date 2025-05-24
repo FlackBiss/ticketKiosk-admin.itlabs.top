@@ -7,7 +7,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 
@@ -37,11 +39,20 @@ class TerminalCrudController extends AbstractCrudController
     {
         yield IdField::new('id', 'ID')->hideOnForm();
         yield IntegerField::new('password', 'Пароль')
-            ->onlyOnForms();
-        yield TextField::new('title', 'Название терминала');
+            ->onlyOnForms()
+            ->setColumns(8);
+        yield TextField::new('title', 'Название терминала')
+            ->setColumns(8);
+
+        yield FormField::addRow();
 
         yield TextField::new('ipAddress', 'IP-адрес')
             ->setColumns(3);
+
+        yield FormField::addRow();
+
+        yield TextEditorField::new('contacts', 'Контакты')
+            ->setColumns(8);
 
         yield TextField::new('isNetworkStringify', 'В сети')
             ->renderAsHtml()

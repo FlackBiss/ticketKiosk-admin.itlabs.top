@@ -34,6 +34,9 @@ class StandByCrudController extends AbstractCrudController
         yield VichFileField::new('mediaFile', 'Файл')
             ->hideOnIndex();
 
+        yield VichFileField::new('media', 'Файл')
+            ->onlyOnIndex();
+
         yield BooleanField::new('view', 'Виден ли файл');
 
         yield IntegerField::new('sequence', 'Порядок отображения');

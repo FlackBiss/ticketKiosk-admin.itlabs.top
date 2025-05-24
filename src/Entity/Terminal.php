@@ -13,6 +13,7 @@ use App\Entity\Traits\UpdatedAtTrait;
 use App\Repository\TerminalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -87,6 +88,10 @@ class Terminal
     #[ORM\Column]
     #[Groups('terminal:read')]
     private ?int $password = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups('terminal:read')]
+    private ?string $contacts = null;
 
     public function __construct()
     {
@@ -236,6 +241,18 @@ class Terminal
     public function setPassword(int $password): static
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getContacts(): ?string
+    {
+        return $this->contacts;
+    }
+
+    public function setContacts(?string $contacts): static
+    {
+        $this->contacts = $contacts;
 
         return $this;
     }

@@ -19,8 +19,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(uriTemplate: '/information'),
     ],
 )]
 #[ORM\Entity(repositoryClass: InformationRepository::class)]
