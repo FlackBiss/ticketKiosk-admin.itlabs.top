@@ -54,9 +54,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[GetCollection(normalizationContext: ['groups' => ['terminal:read']])]
 class Terminal
 {
-    use CreatedAtTrait;
-    use UpdatedAtTrait;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
