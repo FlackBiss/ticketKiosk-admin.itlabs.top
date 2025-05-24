@@ -84,6 +84,10 @@ class Terminal
     #[ORM\OneToMany(targetEntity: ExceptionLog::class, mappedBy: 'terminal', cascade: ['persist', 'remove'])]
     private Collection $exceptionLogs;
 
+    #[ORM\Column]
+    #[Groups('terminal:read')]
+    private ?int $password = null;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
@@ -220,6 +224,18 @@ class Terminal
                 $exceptionLog->setTerminal(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPassword(): ?int
+    {
+        return $this->password;
+    }
+
+    public function setPassword(int $password): static
+    {
+        $this->password = $password;
 
         return $this;
     }

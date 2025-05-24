@@ -36,6 +36,8 @@ class TerminalCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id', 'ID')->hideOnForm();
+        yield IntegerField::new('password', 'Пароль')
+            ->onlyOnForms();
         yield TextField::new('title', 'Название терминала');
 
         yield TextField::new('ipAddress', 'IP-адрес')
