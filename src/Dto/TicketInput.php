@@ -13,4 +13,5 @@ class TicketInput
     public string $email;
     public string $surname;
     public string $name;
+    public int $count;
 }

@@ -12,6 +12,7 @@ use App\Repository\ExceptionLogRepository;
 use App\Repository\TerminalRepository;
 use App\Repository\TicketRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use function Symfony\Component\String\u;
 
 readonly class TicketProcessor implements ProcessorInterface
@@ -26,7 +27,7 @@ readonly class TicketProcessor implements ProcessorInterface
     /**
      * @throws \Exception
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Ticket
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
         $event = $this->eventRepository->find($data->eventId);
 
@@ -50,19 +51,22 @@ readonly class TicketProcessor implements ProcessorInterface
             $this->eventRepository->save($event, true);
         }
 
-        $ticket = new Ticket();
+        for ($i = 0; $i < $data->count; $i++)
+        {
+            $ticket = new Ticket();
 
-        $ticket
-            ->setPlace($data->place)
-            ->setPrice($data->price)
-            ->setEvent($event)
-            ->setType($data->type)
-            ->setEmail($data->email)
-            ->setSurname($data->surname)
-            ->setName($data->name);
+            $ticket
+                ->setPlace($data->place)
+                ->setPrice($data->price)
+                ->setEvent($event)
+                ->setType($data->type)
+                ->setEmail($data->email)
+                ->setSurname($data->surname)
+                ->setName($data->name);
 
-        $this->ticketRepository->save($ticket, true);
+            $this->ticketRepository->save($ticket, true);
+        }
 
-        return $ticket;
+        return new JsonResponse('Successfully created.', Response::HTTP_ACCEPTED);
     }
 }
