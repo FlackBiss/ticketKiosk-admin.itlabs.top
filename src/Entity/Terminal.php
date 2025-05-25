@@ -24,7 +24,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(),
     ],
-    normalizationContext: ['groups' => 'terminal:read'],
+    normalizationContext: ['groups' => ['terminal:read']],
     paginationEnabled: false
 )]
 #[UniqueEntity(fields: ['ipAddress'])]
