@@ -412,7 +412,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert(`Цена для всех мест типа "${placeType.name}" обновлена до ${newPrice}.`);
     });
 
-    places = await (await fetch('/api/places')).json();
+    places = await (await fetch('/api/places', {
+        headers: {
+            'X-API-KEY': '16777761'
+        }
+    })).json();
 
     if (hiddenImageInput || fileInput) {
         await loadBackgroundImage();

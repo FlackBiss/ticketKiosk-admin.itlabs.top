@@ -36,7 +36,11 @@ async function loadBackgroundImage() {
     }
 
     try {
-        const response = await fetch(`/api/schemes/${imageName}`);
+        const response = await fetch(`/api/schemes/${imageName}`, {
+            headers: {
+                'X-API-KEY': '16777761'
+            }
+        });
         const data = await response.json();
         const img = await Image.fromURL(data.image, {crossOrigin: 'anonymous'});
 
@@ -392,7 +396,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert(`Цена для всех мест типа "${placeType.name}" обновлена до ${newPrice}.`);
     });
 
-    places = await (await fetch('/api/places')).json();
+    places = await (await fetch('/api/places', {
+        headers: {
+            'X-API-KEY': '16777761'
+        }
+    })).json();
 
     const schemeSelect = document.getElementById('Event_scheme');
     const schemeDataField = document.getElementById('Event_schemeData');
@@ -406,7 +414,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const schemeId = e.target.value;
         if (!schemeId) return;
         try {
-            const res = await fetch(`/api/schemes/${schemeId}`);
+            const res = await fetch(`/api/schemes/${schemeId}`, {
+                headers: {
+                    'X-API-KEY': '16777761'
+                }
+            });
             const json = await res.json();
             if (json.schemeData) {
                 canvas.clear();
