@@ -67,6 +67,6 @@ readonly class TicketProcessor implements ProcessorInterface
             $this->ticketRepository->save($ticket, true);
         }
 
-        return new JsonResponse('Successfully created.', Response::HTTP_ACCEPTED);
+        return new JsonResponse('Successfully created.', Response::HTTP_CREATED);
     }
 }

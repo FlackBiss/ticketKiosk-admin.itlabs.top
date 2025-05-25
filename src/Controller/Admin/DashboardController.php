@@ -82,10 +82,10 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Места', 'fa fa-chair', Place::class)
             ->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::section('Терминалы и сессии');
+        yield MenuItem::section('Терминалы и сеансы');
         yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class)
             ->setPermission('ROLE_ADMIN');
-        yield MenuItem::linkToCrud('Сессии', 'fa fa-clock', Sessions::class);
+        yield MenuItem::linkToCrud('Сеансы', 'fa fa-clock', Sessions::class);
         yield MenuItem::linkToCrud('Режим ожидания', 'fa fa-terminal', StandBy::class)
             ->setPermission('ROLE_ADMIN');
 
