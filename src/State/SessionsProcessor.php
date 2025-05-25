@@ -46,11 +46,6 @@ readonly class SessionsProcessor implements ProcessorInterface
             ->setTerminal($terminalId)
             ->setDeltaTime($deltaTime);
         foreach ($data->allEvent as $item) {
-
-            if ($this->eventRepository->find($item->objectId) === null)
-            {
-                throw new \Exception('По введённому id, раздела не существует');
-            }
             $event = new SessionEvents();
 
             $event

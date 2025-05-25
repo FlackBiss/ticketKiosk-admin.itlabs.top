@@ -39,9 +39,6 @@ class SessionEvents
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $response = null;
 
-    #[ORM\ManyToOne(inversedBy: 'sessionEvents')]
-    private ?Event $event = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -103,18 +100,6 @@ class SessionEvents
     public function setResponse(?string $response): static
     {
         $this->response = $response;
-
-        return $this;
-    }
-
-    public function getEvent(): ?Event
-    {
-        return $this->event;
-    }
-
-    public function setEvent(?Event $event): static
-    {
-        $this->event = $event;
 
         return $this;
     }

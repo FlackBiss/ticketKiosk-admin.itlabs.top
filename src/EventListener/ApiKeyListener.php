@@ -18,7 +18,7 @@ class ApiKeyListener
     {
         $request = $event->getRequest();
 
-        if (strpos($request->getPathInfo(), '/api') !== 0) {
+        if (strpos($request->getPathInfo(), '/api/') !== 0) {
             return;
         }
 
