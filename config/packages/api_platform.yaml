@@ -36,7 +36,7 @@ api_platform:
     formats:
         json: [ 'application/json' ]
         multipart: [ 'multipart/form-data' ]
-#        jsonld: [ 'application/ld+json' ]
+        jsonld: [ 'application/ld+json' ]
 #        jsonhal: [ 'application/hal+json' ]
 #        jsonapi: [ 'application/vnd.api+json' ]
 #        csv: [ 'text/csv' ]
