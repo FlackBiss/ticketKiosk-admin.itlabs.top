@@ -43,7 +43,6 @@
                     <select class="form-select form-select-sm mb-4 mt-3" id="placesSelect" autocomplete="off">
                         <option value="">Выберите тип места</option>
                     </select>
-
                     <!-- Детали места: показывается после выбора типа -->
                     <div id="seatDetails" class="d-none">
                         <div class="mb-3">
@@ -68,7 +67,7 @@
         </div>
     </div>
 
-    {# Модальное окно информации о месте #}
+    {# Модальное окно информации о месте (редактируемое) #}
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -76,12 +75,38 @@
                     <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body" id="infoContent"></div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <p><strong>Тип места:</strong> <span id="infoPlaceName"></span></p>
+                        <p><strong>Цена:</strong> <span id="infoPlacePrice"></span></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="infoSectionInput" class="form-label">Секция</label>
+                        <input type="text" class="form-control" id="infoSectionInput" name="infoSectionInput">
+                    </div>
+                    <div class="mb-3">
+                        <label for="infoRowInput" class="form-label">Ряд</label>
+                        <input type="text" class="form-control" id="infoRowInput" name="infoRowInput">
+                    </div>
+                    <div class="mb-3">
+                        <label for="infoSeatNumberInput" class="form-label">Номер места</label>
+                        <input type="text" class="form-control" id="infoSeatNumberInput" name="infoSeatNumberInput">
+                    </div>
+                    <div class="mb-3">
+                        <label for="infoWidthInput" class="form-label">Ширина</label>
+                        <input type="number" class="form-control" id="infoWidthInput" name="infoWidthInput" min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="infoHeightInput" class="form-label">Высота</label>
+                        <input type="number" class="form-control" id="infoHeightInput" name="infoHeightInput" min="1" value="1">
+                    </div>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-" id="applyPlaceChangesBtn">Сохранить изменения</button>
                 </div>
             </div>
-        </div>
     </div>
 
     {# Модальное окно предупреждения о бронированном месте #}

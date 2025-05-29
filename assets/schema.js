@@ -4,7 +4,7 @@ import TomSelect from "tom-select/base";
 
 const canvas = new Canvas('canvas', {
     backgroundColor: '#000000',
-    selection: true
+    selection: false
 });
 
 let places = [];
@@ -25,6 +25,43 @@ FabricObject.prototype.toObject = (function (toObject) {
         return toObject.call(this, ['placeData', ...propertiesToInclude]);
     };
 })(FabricObject.prototype.toObject);
+
+// Функция для установки контролов и событий на объект кресла
+function setupChairControls(chair) {
+    chair.controls.deleteControl = new Control({
+        x: 0.5,
+        y: -0.5,
+        offsetY: -16,
+        offsetX: 16,
+        cursorStyle: 'pointer',
+        mouseUpHandler: deleteObject,
+        render: renderIcon,
+        cornerSize: 24
+    });
+
+    chair.controls.infoControl = new Control({
+        x: -0.5,
+        y: -0.5,
+        offsetY: -16,
+        offsetX: -16,
+        cursorStyle: 'pointer',
+        mouseUpHandler: showInfoModalForChair,
+        render: renderInfo,
+        cornerSize: 24
+    });
+
+    chair.on('selected', () => {
+        chair.controls.deleteControl.visible = true;
+        canvas.requestRenderAll();
+    });
+
+    chair.on('deselected', () => {
+        chair.controls.deleteControl.visible = false;
+        canvas.requestRenderAll();
+    });
+
+    chair.on('moving', () => canvas.requestRenderAll());
+}
 
 async function loadBackgroundImage() {
     const select = document.getElementById('Event_scheme');
@@ -87,7 +124,8 @@ function renderInfo(ctx, left, top, _styleOverride, fabricObject) {
     ctx.translate(left, top);
     ctx.rotate(util.degreesToRadians(fabricObject.angle));
     ctx.drawImage(infoImg, -size / 2, -size / 2, size, size);
-    ctx.restore();}
+    ctx.restore();
+}
 
 function deleteObject(_eventData, transform) {
     const canvas = transform.target.canvas;
@@ -96,32 +134,30 @@ function deleteObject(_eventData, transform) {
     return true;
 }
 
-// Show chair info modal
 function showInfoModalForChair(_eventData, transform) {
     const chair = transform.target;
     const place = chair.placeData;
     const modalElement = document.getElementById('infoModal');
 
-    if (!modalElement || !place) {
-        alert('Info modal or place data not found');
-        return false;
-    }
+    if (!modalElement || !place) return false;
 
-    const infoContent = document.getElementById('infoContent');
-    if (infoContent) {
-        infoContent.innerHTML = `
-            <p><strong>Секция:</strong> ${place.section}</p>
-            <p><strong>Ряд:</strong> ${place.row}</p>
-            <p><strong>Номер места:</strong> ${place.seatNumber}</p>
-            <p><strong>Тип места:</strong> ${place.name}</p>
-            <p><strong>Цена:</strong> ${place.price}</p>
-        `;
-    }
+    // Вставляем значения в текстовые поля
+    document.getElementById('infoPlaceName').textContent  = place.name ?? '—';
+    document.getElementById('infoPlacePrice').textContent = place.price ?? '—';
 
-    bootstrap.Modal.getOrCreateInstance(modalElement, {
-        backdrop: 'static',
-        keyboard: false
-    }).show();
+    // Вставляем значения в инпуты, обеспечивая минимум 1
+    document.getElementById('infoSectionInput').value    = place.section ?? '';
+    document.getElementById('infoRowInput').value        = place.row ?? '';
+    document.getElementById('infoSeatNumberInput').value = place.seatNumber ?? '';
+
+    const widthInput = document.getElementById('infoWidthInput');
+    const heightInput = document.getElementById('infoHeightInput');
+
+    widthInput.value = (chair.width && chair.width >= 1) ? Math.max(1, Math.round(chair.width)) : 30;
+    heightInput.value = (chair.height && chair.height >= 1) ? Math.max(1, Math.round(chair.height)) : 30;
+
+    canvas.setActiveObject(chair);
+    bootstrap.Modal.getOrCreateInstance(modalElement).show();
     return true;
 }
 
@@ -137,7 +173,7 @@ async function addChair(e) {
     const chairType = select.value;
     const option = select.querySelector(`option[value="${chairType}"]`);
     const fillColor = option.getAttribute('data-color');
-    let placeData = places.find(p => p.id == chairType)
+    let placeData = places.find(p => p.id == chairType);
 
     const section = sectionInput.value.trim();
     const row     = rowInput.value.trim();
@@ -166,39 +202,7 @@ async function addChair(e) {
         objectCaching: false
     });
 
-    chair.controls.deleteControl = new Control({
-        x: 0.5,
-        y: -0.5,
-        offsetY: -16,
-        offsetX: 16,
-        cursorStyle: 'pointer',
-        mouseUpHandler: deleteObject,
-        render: renderIcon,
-        cornerSize: 24
-    });
-
-    chair.controls.infoControl = new Control({
-        x: -0.5,
-        y: -0.5,
-        offsetY: -16,
-        offsetX: -16,
-        cursorStyle: 'pointer',
-        mouseUpHandler: showInfoModalForChair,
-        render: renderInfo,
-        cornerSize: 24
-    });
-
-    chair.on('selected', () => {
-        chair.controls.deleteControl.visible = true;
-        canvas.requestRenderAll();
-    });
-
-    chair.on('deselected', () => {
-        chair.controls.deleteControl.visible = false;
-        canvas.requestRenderAll();
-    });
-
-    chair.on('moving', () => canvas.requestRenderAll());
+    setupChairControls(chair);
 
     canvas.add(chair);
     canvas.setActiveObject(chair);
@@ -229,8 +233,10 @@ function saveData() {
         cords: place.getCoords(),
         left: place.left,
         top: place.top,
-        width: place.getScaledWidth(),
-        height: place.getScaledHeight(),
+        width: place.width,
+        height: place.height,
+        scaleX: place.scaleX || 1,
+        scaleY: place.scaleY || 1,
         booked: place.placeData.booked ?? false,
         section:    place.placeData.section ?? null,
         row:        place.placeData.row ?? null,
@@ -253,6 +259,8 @@ function loadObjects() {
             top: place.top,
             width: place.width,
             height: place.height,
+            scaleX: place.scaleX || 1,
+            scaleY: place.scaleY || 1,
             opacity: 0.5,
             fill: isBooked ? '#999999' : place.color,
             selectable: !isBooked,
@@ -285,39 +293,7 @@ function loadObjects() {
             });
         }
 
-        chair.controls.deleteControl = new Control({
-            x: 0.5,
-            y: -0.5,
-            offsetY: -16,
-            offsetX: 16,
-            cursorStyle: 'pointer',
-            mouseUpHandler: deleteObject,
-            render: renderIcon,
-            cornerSize: 24
-        });
-
-        chair.controls.infoControl = new Control({
-            x: -0.5,
-            y: -0.5,
-            offsetY: -16,
-            offsetX: -16,
-            cursorStyle: 'pointer',
-            mouseUpHandler: showInfoModalForChair,
-            render: renderInfo,
-            cornerSize: 24
-        });
-
-        chair.on('selected', () => {
-            chair.controls.deleteControl.visible = true;
-            canvas.requestRenderAll();
-        });
-
-        chair.on('deselected', () => {
-            chair.controls.deleteControl.visible = false;
-            canvas.requestRenderAll();
-        });
-
-        chair.on('moving', () => canvas.requestRenderAll());
+        setupChairControls(chair);
 
         canvas.add(chair);
         canvas.setActiveObject(chair);
@@ -361,7 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
 
     // Подстановка текущей цены при выборе типа
     placeTypeSelect.addEventListener('change', (e) => {
@@ -461,16 +436,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         canvas.requestRenderAll();
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Delete' && canvas.getActiveObject()) {
-            const activeObject = canvas.getActiveObject();
-            if (activeObject.type === 'place') {
-                canvas.remove(activeObject);
-                canvas.requestRenderAll();
-            }
-        }
-    });
-
     submitBtns.forEach(btn => btn.addEventListener('click', saveData));
 
     if (eventScheme.value) {
@@ -532,21 +497,121 @@ document.addEventListener('DOMContentLoaded', async () => {
     const numberInput  = document.getElementById('seatNumberInput');
     const placeModalEl = document.getElementById('placeSelectModal');
 
-// 1) При каждом открытии модалки — сбрасываем селект и скрываем блок
     placeModalEl.addEventListener('show.bs.modal', () => {
         placesSelect.value = '';
-        seatDetails.classList.add('d-none');
-        sectionInput.value = '';
-        rowInput.value     = '';
-        numberInput.value  = '';
+        if (seatDetails) seatDetails.classList.add('d-none');
+        if (sectionInput) sectionInput.value = '';
+        if (rowInput) rowInput.value = '';
+        if (numberInput) numberInput.value = '';
     });
-
-// 2) Когда пользователь выбирает тип — показываем блок деталей
     placesSelect.addEventListener('change', () => {
+        if (!seatDetails) return;
         if (placesSelect.value) {
             seatDetails.classList.remove('d-none');
         } else {
             seatDetails.classList.add('d-none');
+        }
+    });
+
+    applyPlaceChangesBtn?.addEventListener('click', () => {
+        const chair = canvas.getActiveObject();
+        if (!chair || !chair.placeData) return;
+
+        const section    = document.getElementById('infoSectionInput').value.trim();
+        const row        = document.getElementById('infoRowInput').value.trim();
+        const seatNumber = document.getElementById('infoSeatNumberInput').value.trim();
+        const width      = parseFloat(document.getElementById('infoWidthInput').value);
+        const height     = parseFloat(document.getElementById('infoHeightInput').value);
+
+        chair.placeData.section    = section;
+        chair.placeData.row        = row;
+        chair.placeData.seatNumber = seatNumber;
+
+        let newWidth = chair.width;
+        let newHeight = chair.height;
+
+        if (!isNaN(width) && width > 0) newWidth = Math.round(width);
+        if (!isNaN(height) && height > 0) newHeight = Math.round(height);
+
+        chair.set({
+            scaleX: 1,
+            scaleY: 1,
+            width: newWidth,
+            height: newHeight
+        });
+
+        chair.setCoords();
+        canvas.requestRenderAll();
+        saveData();
+
+        bootstrap.Modal.getInstance(document.getElementById('infoModal'))?.hide();
+    });
+
+    canvas.on('selection:created', (e) => {
+        const sel = e.target;
+        if (sel && sel.type === 'activeSelection') {
+            canvas.discardActiveObject();
+            canvas.requestRenderAll();
+        }
+    });
+
+    document.addEventListener('keydown', async (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+            const active = canvas.getActiveObject();
+            console.log('Ctrl+C pressed, active object:', active);
+            if (active && active.placeData) {
+                try {
+                    // Сохраняем сериализованный объект с placeData
+                    const json = active.toJSON(['placeData']);
+                    window._fabricClipboard = json;
+                    console.log('Place copied:', json);
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                }
+            } else {
+                console.log('No valid active object to copy');
+            }
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+            e.preventDefault();
+            if (window._fabricClipboard) {
+                try {
+                    // enlivenObjects принимает массив, оборачиваем
+                    const objects = await util.enlivenObjects([window._fabricClipboard]);
+                    if (!objects || objects.length === 0) {
+                        console.log('No objects enlivened');
+                        return;
+                    }
+                    const cloned = objects[0];
+
+                    // Генерируем новый uuid, создаём глубокую копию placeData
+                    cloned.placeData = {...cloned.placeData, uuid: uuidv4()};
+
+                    // Сбросим scaleX/Y, чтобы ширина/высота были корректны
+                    cloned.set({
+                        left: (cloned.left || 0) + 20,
+                        top: (cloned.top || 0) + 20,
+                        scaleX: 1,
+                        scaleY: 1,
+                        evented: true,
+                        selectable: true,
+                        objectCaching: false
+                    });
+
+                    setupChairControls(cloned);
+
+                    canvas.add(cloned);
+                    canvas.setActiveObject(cloned);
+                    canvas.requestRenderAll();
+                    saveData();
+                    console.log('Place pasted', cloned);
+                } catch (err) {
+                    console.error('Paste failed:', err);
+                }
+            } else {
+                console.log('Clipboard empty');
+            }
         }
     });
 });
