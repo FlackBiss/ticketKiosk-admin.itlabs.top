@@ -396,4 +396,30 @@ class Event
 
         return $this;
     }
+
+    #[Groups(['event:read'])]
+    public function getPlacesHave(): ?int
+    {
+        $placesHave = 0;
+
+        if ($this->getType() === 'Ограниченное количество мест')
+        {
+            $placesHave = $this->getPlaces() - $this->getTickets()?->count() ?? 0;
+        }
+
+        else if ($this->getType() === 'Места согласно билетам')
+        {
+            foreach ($this->getSchemeDataJson() as $item)
+            {
+                if ($item['booked'] === true)
+                {
+                    $placesHave++;
+                }
+            }
+
+            $placesHave = count($this->getSchemeDataJson()) - $placesHave;
+        }
+
+        return $placesHave;
+    }
 }
