@@ -409,15 +409,18 @@ class Event
 
         else if ($this->getType() === 'Места согласно билетам')
         {
-            foreach ($this->getSchemeDataJson() as $item)
+            if ($this->getSchemeDataJson())
             {
-                if ($item['booked'] === true)
+                foreach ($this->getSchemeDataJson() as $item)
                 {
-                    $placesHave++;
+                    if ($item['booked'] === true)
+                    {
+                        $placesHave++;
+                    }
                 }
-            }
 
-            $placesHave = count($this->getSchemeDataJson()) - $placesHave;
+                $placesHave = count($this->getSchemeDataJson()) - $placesHave;
+            }
         }
 
         return $placesHave;

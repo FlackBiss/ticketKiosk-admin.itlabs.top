@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Place;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
@@ -24,6 +26,12 @@ class PlaceCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('место')
             ->setPageTitle(Crud::PAGE_NEW, 'Добавление места')
             ->setPageTitle(Crud::PAGE_EDIT, 'Изменение места');
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->disable(Action::NEW, Action::DELETE, Action::EDIT);
     }
 
     public function configureFields(string $pageName): iterable

@@ -17,13 +17,15 @@ class EventController extends AbstractController
             return $a->getDateTimeAt() <=> $b->getDateTimeAt();
         });
 
-        $events = array_unique($events);
+        $dates = array_map(
+            fn(Event $event) => $event->getDateTimeAt()->format('Y-m-d'),
+            $events
+        );
+
+        $uniqueDates = array_values(array_unique($dates));
 
         return $this->json([
-            'dates' => array_map(
-                fn(Event $event) => $event->getDateTimeAt()->format('Y-m-d'),
-                $events
-            ),
+            'dates' => $uniqueDates,
         ]);
     }
 }

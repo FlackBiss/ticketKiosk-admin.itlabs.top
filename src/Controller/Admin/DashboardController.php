@@ -95,7 +95,7 @@ class DashboardController extends AbstractDashboardController
             ->setPermission('ROLE_ADMIN');
 
         yield MenuItem::linkToRoute(
-            'Билеты — по датам',
+            'Статистика продаж',
             'fa fa-ticket-alt',
             'app_stats_ticket'
         );

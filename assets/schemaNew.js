@@ -140,9 +140,10 @@ function populatePlaceTypes() {
 
     placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
 
-    // Показываем только типы, которые есть на канвасе (используются)
     const usedPlaceIds = new Set(
-        canvas.getObjects().map(obj => obj.placeData.placeId)
+        canvas.getObjects()
+            .filter(obj => obj.placeData && obj.placeData.placeId !== undefined)
+            .map(obj => obj.placeData.placeId)
     );
 
     places.forEach(place => {
@@ -283,24 +284,33 @@ async function addChair(e) {
 // Save canvas data
 function saveData() {
     const schemeDataField = document.getElementById('Scheme_schemeData');
-    const data = canvas.getObjects().map(place => ({
-        placeId: place.placeData.placeId,
-        uuid: place.placeData.uuid,
-        name: place.placeData.name,
-        price: place.placeData.price,
-        color: place.placeData.color,
-        cords: place.getCoords(),
-        left: place.left,
-        top: place.top,
-        width: place.width,
-        height: place.height,
-        scaleX: place.scaleX || 1,
-        scaleY: place.scaleY || 1,
-        booked: place.placeData.booked ?? false,
-        section:    place.placeData.section ?? null,
-        row:        place.placeData.row ?? null,
-        seatNumber: place.placeData.seatNumber ?? null,
-    }));
+    if (!schemeDataField) {
+        console.warn('Element with id "Event_schemeData" not found.');
+        return;
+    }
+
+    const data = canvas.getObjects()
+        .filter(place => place.placeData)
+        .map(place => ({
+            placeId: place.placeData.placeId,
+            uuid: place.placeData.uuid,
+            name: place.placeData.name,
+            price: place.placeData.price,
+            color: place.placeData.color,
+            cords: place.getCoords(),
+            left: place.left,
+            top: place.top,
+            width: place.width,
+            height: place.height,
+            scaleX: place.scaleX || 1,
+            scaleY: place.scaleY || 1,
+            strokeWidth: 0,
+            booked: place.placeData.booked ?? false,
+            section: place.placeData.section ?? null,
+            row: place.placeData.row ?? null,
+            seatNumber: place.placeData.seatNumber ?? null,
+        }));
+
     schemeDataField.value = JSON.stringify(data);
 }
 
@@ -390,7 +400,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
 
         const usedPlaceIds = new Set(
-            canvas.getObjects().map(obj => obj.placeData.placeId)
+            canvas.getObjects()
+                .filter(obj => obj.placeData && obj.placeData.placeId !== undefined)
+                .map(obj => obj.placeData.placeId)
         );
 
         places.forEach(place => {
@@ -475,7 +487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rulerRect = new fabric.Rect({
                 left: 0,
                 top: 100,
-                width: canvas.getWidth() * 0.2,
+                width: canvas.getWidth() * 0.8,
                 height: 16,
                 fill: 'rgba(200,0,0,0.3)',
                 selectable: true,
@@ -494,7 +506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 left: 100,
                 top: 0,
                 width: 16,
-                height: canvas.getHeight() * 0.2,
+                height: canvas.getHeight() * 0.8,
                 fill: 'rgba(0,0,200,0.3)',
                 selectable: true,
                 objectCaching: false,
@@ -551,7 +563,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Обработчик движения объектов, ограничивающий пересечение с линейкой
     canvas.on('object:moving', (e) => {
         const obj = e.target;
-        if (!rulerRect || obj === rulerRect) return;
+        if (!rulerRect || !obj || obj === rulerRect) return;
+        if (typeof obj.getBoundingRect !== 'function' || typeof rulerRect.getBoundingRect !== 'function') return;
 
         obj.setCoords();
         rulerRect.setCoords();
