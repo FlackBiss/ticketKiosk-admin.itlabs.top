@@ -145,7 +145,6 @@ function showInfoModalForChair(_eventData, transform) {
     document.getElementById('infoPlaceName').textContent  = place.name ?? '—';
     document.getElementById('infoPlacePrice').textContent = place.price ?? '—';
 
-    // Вставляем значения в инпуты, обеспечивая минимум 1
     document.getElementById('infoSectionInput').value    = place.section ?? '';
     document.getElementById('infoRowInput').value        = place.row ?? '';
     document.getElementById('infoSeatNumberInput').value = place.seatNumber ?? '';
@@ -153,8 +152,8 @@ function showInfoModalForChair(_eventData, transform) {
     const widthInput = document.getElementById('infoWidthInput');
     const heightInput = document.getElementById('infoHeightInput');
 
-    widthInput.value = (chair.width && chair.width >= 1) ? Math.max(1, Math.round(chair.width)) : 30;
-    heightInput.value = (chair.height && chair.height >= 1) ? Math.max(1, Math.round(chair.height)) : 30;
+    widthInput.value  = Math.round(chair.getScaledWidth());
+    heightInput.value = Math.round(chair.getScaledHeight());
 
     canvas.setActiveObject(chair);
     bootstrap.Modal.getOrCreateInstance(modalElement).show();
@@ -561,13 +560,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Ctrl+C pressed, active object:', active);
             if (active && active.placeData) {
                 try {
-                    // Сохраняем сериализованный объект с placeData
-                    const json = active.toJSON(['placeData']);
+                    active.set('placeData', { ...active.placeData });
+                    const json = active.toJSON(['placeData', 'scaleX', 'scaleY', 'width', 'height']);
                     window._fabricClipboard = json;
                     console.log('Place copied:', json);
                 } catch (err) {
-                    console.error('Copy failed:', err);
-                }
+                    console.error('Copy failed:', err);}
             } else {
                 console.log('No valid active object to copy');
             }
@@ -588,12 +586,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Генерируем новый uuid, создаём глубокую копию placeData
                     cloned.placeData = {...cloned.placeData, uuid: uuidv4()};
 
-                    // Сбросим scaleX/Y, чтобы ширина/высота были корректны
                     cloned.set({
                         left: (cloned.left || 0) + 20,
                         top: (cloned.top || 0) + 20,
-                        scaleX: 1,
-                        scaleY: 1,
                         evented: true,
                         selectable: true,
                         objectCaching: false

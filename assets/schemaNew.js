@@ -159,7 +159,6 @@ function showInfoModalForChair(_eventData, transform) {
     document.getElementById('infoPlaceName').textContent  = place.name ?? '—';
     document.getElementById('infoPlacePrice').textContent = place.price ?? '—';
 
-    // Вставляем значения в инпуты, обеспечивая минимум 1
     document.getElementById('infoSectionInput').value    = place.section ?? '';
     document.getElementById('infoRowInput').value        = place.row ?? '';
     document.getElementById('infoSeatNumberInput').value = place.seatNumber ?? '';
@@ -167,8 +166,8 @@ function showInfoModalForChair(_eventData, transform) {
     const widthInput = document.getElementById('infoWidthInput');
     const heightInput = document.getElementById('infoHeightInput');
 
-    widthInput.value = (chair.width && chair.width >= 1) ? Math.max(1, Math.round(chair.width)) : 30;
-    heightInput.value = (chair.height && chair.height >= 1) ? Math.max(1, Math.round(chair.height)) : 30;
+    widthInput.value  = Math.round(chair.getScaledWidth());
+    heightInput.value = Math.round(chair.getScaledHeight());
 
     canvas.setActiveObject(chair);
     bootstrap.Modal.getOrCreateInstance(modalElement).show();
