@@ -43,8 +43,10 @@ class InformationCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id', 'ID')->hideOnForm();
-        yield TextEditorField::new('description', 'Описание');
+        yield TextEditorField::new('description', 'Описание')
+            ->setColumns(8);
         yield VichImageField::new('imageFile', 'Изображение')
-            ->hideOnIndex();
+            ->hideOnIndex()
+            ->setColumns(8);
     }
 }
