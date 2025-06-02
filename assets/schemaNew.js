@@ -133,6 +133,25 @@ function renderIcon(ctx, left, top, _styleOverride, fabricObject) {
     ctx.restore();
 }
 
+function populatePlaceTypes() {
+    const placeTypeSelect = document.getElementById('placeTypeSelect');
+    if (!placeTypeSelect) return;
+
+    placeTypeSelect.innerHTML = '<option value="">Выберите тип места</option>';
+
+    // Показываем только типы, которые есть на канвасе (используются)
+    const usedPlaceIds = new Set(
+        canvas.getObjects().map(obj => obj.placeData.placeId)
+    );
+
+    places.forEach(place => {
+        if (usedPlaceIds.has(place.id)) {
+            placeTypeSelect.insertAdjacentHTML('beforeend',
+                `<option value="${place.id}" data-price="${place.price}">${place.name}</option>`);
+        }
+    });
+}
+
 function renderInfo(ctx, left, top, _styleOverride, fabricObject) {
     const size = this.cornerSize;
     ctx.save();
@@ -155,22 +174,47 @@ function showInfoModalForChair(_eventData, transform) {
 
     if (!modalElement || !place) return false;
 
-    // Вставляем значения в текстовые поля
-    document.getElementById('infoPlaceName').textContent  = place.name ?? '—';
-    document.getElementById('infoPlacePrice').textContent = place.price ?? '—';
+    // Заполняем селектор типов мест
+    const typeSelect = document.getElementById('infoPlaceTypeSelect');
+    if (typeSelect) {
+        typeSelect.innerHTML = '';
+        places.forEach(p => {
+            const selected = p.id === place.placeId ? 'selected' : '';
+            typeSelect.insertAdjacentHTML(
+                'beforeend',
+                `<option value="${p.id}" data-price="${p.price}" data-color="${p.color}" ${selected}>${p.name}</option>`
+            );
+        });
 
+        // Обновляем цену при смене выбора
+        typeSelect.addEventListener('change', () => {
+            const selectedId = typeSelect.value;
+            const selectedPlace = places.find(pl => pl.id == selectedId);
+            const priceSpan = document.getElementById('infoPlacePrice');
+            if (priceSpan) {
+                priceSpan.textContent = selectedPlace ? selectedPlace.price : '—';
+            }
+        });
+    }
+
+    // Устанавливаем цену текущего типа
+    const priceSpan = document.getElementById('infoPlacePrice');
+    if (priceSpan) {
+        priceSpan.textContent = place.price ?? '—';
+    }
+
+    // Заполняем остальные поля
     document.getElementById('infoSectionInput').value    = place.section ?? '';
     document.getElementById('infoRowInput').value        = place.row ?? '';
     document.getElementById('infoSeatNumberInput').value = place.seatNumber ?? '';
 
-    const widthInput = document.getElementById('infoWidthInput');
-    const heightInput = document.getElementById('infoHeightInput');
-
-    widthInput.value  = Math.round(chair.getScaledWidth());
-    heightInput.value = Math.round(chair.getScaledHeight());
+    document.getElementById('infoWidthInput').value  = Math.round(chair.getScaledWidth());
+    document.getElementById('infoHeightInput').value = Math.round(chair.getScaledHeight());
 
     canvas.setActiveObject(chair);
+
     bootstrap.Modal.getOrCreateInstance(modalElement).show();
+
     return true;
 }
 
@@ -198,6 +242,7 @@ async function addChair(e) {
         width: 30,
         height: 30,
         opacity: 0.5,
+        strokeWidth: 0,
         fill: fillColor,
         selectable: true,
         type: 'place',
@@ -274,6 +319,7 @@ function loadObjects() {
             height: place.height,
             scaleX: place.scaleX || 1,
             scaleY: place.scaleY || 1,
+            strokeWidth: 0,
             opacity: 0.5,
             fill: isBooked ? '#999999' : place.color,
             selectable: !isBooked,
@@ -483,13 +529,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const width      = parseFloat(document.getElementById('infoWidthInput').value);
         const height     = parseFloat(document.getElementById('infoHeightInput').value);
 
+        const typeSelect = document.getElementById('infoPlaceTypeSelect');
+        const selectedPlace = places.find(p => p.id == typeSelect.value);
+
+        if (selectedPlace) {
+            chair.placeData.placeId = selectedPlace.id;
+            chair.placeData.name    = selectedPlace.name;
+            chair.placeData.price   = selectedPlace.price;
+            chair.placeData.color   = selectedPlace.color;
+            chair.set({ fill: selectedPlace.color });
+        }
+
         chair.placeData.section    = section;
         chair.placeData.row        = row;
         chair.placeData.seatNumber = seatNumber;
 
         let newWidth = chair.width;
         let newHeight = chair.height;
-
         if (!isNaN(width) && width > 0) newWidth = Math.round(width);
         if (!isNaN(height) && height > 0) newHeight = Math.round(height);
 
@@ -503,6 +559,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         chair.setCoords();
         canvas.requestRenderAll();
         saveData();
+
+        // Обновляем селектор с типами мест, чтобы отобразить новую цену
+        populatePlaceTypes();
 
         bootstrap.Modal.getInstance(document.getElementById('infoModal'))?.hide();
     });

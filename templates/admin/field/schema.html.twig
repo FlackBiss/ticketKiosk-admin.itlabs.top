@@ -72,12 +72,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    <h5 class="modal-title" id="infoModalLabel">Информация о месте</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <p><strong>Тип места:</strong> <span id="infoPlaceName"></span></p>
+                        <div class="mb-3">
+                            <label for="infoPlaceTypeSelect" class="form-label">Тип места</label>
+                            <select id="infoPlaceTypeSelect" class="form-select"></select>
+                        </div>
                         <p><strong>Цена:</strong> <span id="infoPlacePrice"></span></p>
                     </div>
 
