@@ -36,13 +36,19 @@ class NewsCrudController extends AbstractCrudController
             ->hideOnForm();
 
         yield VichImageField::new('imageFile', 'Изображение')
-            ->hideOnIndex();
+            ->hideOnIndex()
+            ->setColumns(8);
 
-        yield TextField::new('title', 'Заголовок');
-        yield TextEditorField::new('description', 'Описание');
-        yield TextField::new('shortDescription', 'Краткое описание');
-        yield DateTimeField::new('dateTimeAt', 'Дата и время');
+        yield TextField::new('title', 'Заголовок')
+            ->setColumns(8);
+        yield TextEditorField::new('description', 'Описание')
+            ->setColumns(8);
+        yield TextField::new('shortDescription', 'Краткое описание')
+            ->setColumns(8);
+        yield DateTimeField::new('dateTimeAt', 'Дата и время')
+            ->setColumns(8);
 
-        yield AssociationField::new('event', 'Мероприятие');
+        yield AssociationField::new('event', 'Мероприятие')
+            ->setColumns(8);
     }
 }

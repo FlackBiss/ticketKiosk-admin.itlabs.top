@@ -30,8 +30,11 @@ class PlaceCrudController extends AbstractCrudController
     {
         yield IdField::new('id')
             ->hideOnForm();
-        yield TextField::new('name', 'Название');
-        yield IntegerField::new('price', 'Цена');
-        yield ColorField::new('color', 'Цвет');
+        yield TextField::new('name', 'Название')
+            ->setColumns(8);
+        yield IntegerField::new('price', 'Цена')
+            ->setColumns(8);
+        yield ColorField::new('color', 'Цвет')
+            ->setColumns(8);
     }
 }

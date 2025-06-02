@@ -49,11 +49,15 @@ class EventCrudController extends AbstractCrudController
         yield IdField::new('id', 'ID')->hideOnForm();
 
         yield FormField::addTab('Основная информация');
-        yield TextField::new('title', 'Название');
-        yield TextEditorField::new('description', 'Описание');
-        yield TextEditorField::new('shortDescription', 'Краткое описание');
+        yield TextField::new('title', 'Название')
+            ->setColumns(8);
+        yield TextEditorField::new('description', 'Описание')
+            ->setColumns(8);
+        yield TextEditorField::new('shortDescription', 'Краткое описание')
+            ->setColumns(8);
 
-        yield DateTimeField::new('dateTimeAt', 'Дата и время');
+        yield DateTimeField::new('dateTimeAt', 'Дата и время')
+            ->setColumns(8);
 
         yield ChoiceField::new('type', 'Тип')
             ->setChoices(
@@ -62,7 +66,8 @@ class EventCrudController extends AbstractCrudController
                     'Ограниченное количество мест' => 'Ограниченное количество мест',
                     'Места согласно билетам' => 'Места согласно билетам',
                 ]
-            );
+            )
+            ->setColumns(8);
         yield ChoiceField::new('age', 'Возраст')
             ->setChoices
             (
@@ -73,27 +78,30 @@ class EventCrudController extends AbstractCrudController
                     '16+' => '16+',
                     '18+' => '18+',
                 ]
-            );
+            )
+            ->setColumns(8);
 
-        yield TimeField::new('duration', 'Длительность');
+        yield TimeField::new('duration', 'Длительность')
+            ->setColumns(8);
 
-        yield IntegerField::new('places', 'Места (количество)');
+        yield IntegerField::new('places', 'Места (количество)')
+            ->setColumns(8);
 
         yield AssociationField::new('news', 'Новости')
             ->hideOnForm();
 
-        yield NumberField::new('price', 'Цена');
-
-        yield AssociationField::new('tickets', 'Билеты')
-            ->hideOnForm();
+        yield NumberField::new('price', 'Цена')
+            ->setColumns(8);
 
         yield VichImageField::new('imageFile', 'Изображение')
             ->setRequired(false)
             ->setFormTypeOption('allow_delete', false)
-            ->onlyOnForms();
+            ->onlyOnForms()
+            ->setColumns(8);
 
         yield FormField::addTab('Схема зала');
-        yield AssociationField::new('scheme', 'Схема зала');
+        yield AssociationField::new('scheme', 'Схема зала')
+            ->setColumns(8);
         yield HiddenField::new('schemeWidget')
             ->setFormTypeOptions([
                 'block_name' => 'schema',

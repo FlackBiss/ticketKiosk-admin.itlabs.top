@@ -47,7 +47,7 @@ class TerminalCrudController extends AbstractCrudController
         yield FormField::addRow();
 
         yield TextField::new('ipAddress', 'IP-адрес')
-            ->setColumns(3);
+            ->setColumns(8);
 
         yield FormField::addRow();
 
@@ -61,8 +61,5 @@ class TerminalCrudController extends AbstractCrudController
         yield TextField::new('isKktStringify', 'Есть бумага')
             ->renderAsHtml()
             ->onlyOnIndex();
-
-        yield AssociationField::new('sessions', 'Сессии')->hideOnForm();
-        yield AssociationField::new('exceptionLogs', 'Исключения')->hideOnForm();
     }
 }

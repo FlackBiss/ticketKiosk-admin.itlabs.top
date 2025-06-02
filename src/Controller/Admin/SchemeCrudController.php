@@ -42,12 +42,14 @@ class SchemeCrudController extends AbstractCrudController
         yield FormField::addTab('Главная');
         yield IdField::new('id')
             ->hideOnForm();
-        yield TextField::new('name', 'Название');
+        yield TextField::new('name', 'Название')
+            ->setColumns(8);
         yield VichImageField::new('imageFile', 'Изображение')
             ->setRequired(true)
             ->setFormTypeOption('allow_delete', false)
             ->onlyOnForms()
-            ->hideWhenUpdating();
+            ->hideWhenUpdating()
+            ->setColumns(8);
         yield VichImageField::new('image', 'Изображение')
             ->setRequired(true)
             ->setFormTypeOption('allow_delete', false)
