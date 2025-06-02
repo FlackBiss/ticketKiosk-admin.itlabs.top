@@ -1,5 +1,6 @@
 import {Canvas, Control, Image, Object as FabricObject, Rect, util} from 'fabric';
 import {v4 as uuidv4} from 'uuid';
+import * as fabric from "fabric";
 
 const canvas = new Canvas('canvas', {
     backgroundColor: '#000000',
@@ -454,18 +455,142 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    let rulerRect = null;
+    let rulerOrientation = 'horizontal'; // 'horizontal' или 'vertical'
+
+    function sendToBack(obj) {
+        canvas.remove(obj);
+        canvas._objects.unshift(obj);
+        canvas.requestRenderAll();
+    }
+
+    function createRuler(orientation = 'horizontal') {
+        if (rulerRect) {
+            canvas.remove(rulerRect);
+            rulerRect = null;
+        }
+        rulerOrientation = orientation;
+
+        if (orientation === 'horizontal') {
+            rulerRect = new fabric.Rect({
+                left: 0,
+                top: 100,
+                width: canvas.getWidth() * 0.2,
+                height: 16,
+                fill: 'rgba(200,0,0,0.3)',
+                selectable: true,
+                objectCaching: false,
+                hasControls: true,
+                lockMovementX: false,
+                lockMovementY: false,
+                lockScalingX: false,
+                lockScalingY: false,
+                lockRotation: false,
+                hoverCursor: 'move',
+            });
+        } else {
+            // вертикальная линейка
+            rulerRect = new fabric.Rect({
+                left: 100,
+                top: 0,
+                width: 16,
+                height: canvas.getHeight() * 0.2,
+                fill: 'rgba(0,0,200,0.3)',
+                selectable: true,
+                objectCaching: false,
+                hasControls: true,
+                lockMovementX: false,
+                lockMovementY: false,
+                lockScalingX: false,
+                lockScalingY: false,
+                lockRotation: false,
+                hoverCursor: 'move',
+            });
+        }
+
+        canvas.add(rulerRect);
+        sendToBack(rulerRect);
+        canvas.setActiveObject(rulerRect);
+        canvas.requestRenderAll();
+    }
+
+    function removeRuler() {
+        if (!rulerRect) return;
+        canvas.remove(rulerRect);
+        rulerRect = null;
+        canvas.requestRenderAll();
+    }
+
+// Кнопки на странице
+    const toggleRulerBtn = document.getElementById('toggleRulerBtn');
+    const toggleOrientationBtn = document.getElementById('toggleOrientationBtn');
+
+    toggleRulerBtn?.addEventListener('click', () => {
+        if (rulerRect) {
+            removeRuler();
+            toggleRulerBtn.textContent = 'Показать линейку';
+            toggleOrientationBtn.disabled = true;
+        } else {
+            createRuler(rulerOrientation);
+            toggleRulerBtn.textContent = 'Скрыть линейку';
+            toggleOrientationBtn.disabled = false;
+        }
+    });
+
+    toggleOrientationBtn?.addEventListener('click', () => {
+        if (!rulerRect) return;
+        if (rulerOrientation === 'horizontal') {
+            createRuler('vertical');
+            toggleOrientationBtn.textContent = 'Горизонтальная линейка';
+        } else {
+            createRuler('horizontal');
+            toggleOrientationBtn.textContent = 'Вертикальная линейка';
+        }
+    });
+
+// Обработчик движения объектов, ограничивающий пересечение с линейкой
     canvas.on('object:moving', (e) => {
         const obj = e.target;
-        obj.setCoords();
-        const br = obj.getBoundingRect(true);
+        if (!rulerRect || obj === rulerRect) return;
 
-        if (br.left < 0) obj.left -= br.left;
-        if (br.top < 0) obj.top -= br.top;
-        if (br.left + br.width > canvas.getWidth()) {
-            obj.left -= (br.left + br.width - canvas.getWidth());
-        }
-        if (br.top + br.height > canvas.getHeight()) {
-            obj.top -= (br.top + br.height - canvas.getHeight());
+        obj.setCoords();
+        rulerRect.setCoords();
+
+        const objBR = obj.getBoundingRect(true);
+        const rulerBR = rulerRect.getBoundingRect(true);
+
+        // Ограничение по краям канваса
+        if (objBR.left < 0) obj.left -= objBR.left;
+        if (objBR.top < 0) obj.top -= objBR.top;
+        if (objBR.left + objBR.width > canvas.getWidth()) obj.left -= (objBR.left + objBR.width - canvas.getWidth());
+        if (objBR.top + objBR.height > canvas.getHeight()) obj.top -= (objBR.top + objBR.height - canvas.getHeight());
+
+        // Проверяем пересечение с линейкой в зависимости от ориентации
+        if (rulerOrientation === 'horizontal') {
+            const intersectsHorizontally = (objBR.left < rulerBR.left + rulerBR.width) && (objBR.left + objBR.width > rulerBR.left);
+            const intersectsVertically = (objBR.top < rulerBR.top + rulerBR.height) && (objBR.top + objBR.height > rulerBR.top);
+
+            if (intersectsHorizontally && intersectsVertically) {
+                if (objBR.top < rulerBR.top) {
+                    obj.top -= (objBR.top + objBR.height - rulerBR.top);
+                } else {
+                    obj.top += (rulerBR.top + rulerBR.height - objBR.top);
+                }
+                obj.setCoords();
+            }
+        } else {
+            // вертикальная линейка - ограничение по горизонтали
+            const intersectsHorizontally = (objBR.left < rulerBR.left + rulerBR.width) && (objBR.left + objBR.width > rulerBR.left);
+            const intersectsVertically = (objBR.top < rulerBR.top + rulerBR.height) && (objBR.top + objBR.height > rulerBR.top);
+
+            if (intersectsHorizontally && intersectsVertically) {
+                if (objBR.left < rulerBR.left) {
+                    obj.left -= (objBR.left + objBR.width - rulerBR.left);
+                } else {
+                    obj.left += (rulerBR.left + rulerBR.width - objBR.left);
+                }
+                obj.setCoords();
+            }
         }
 
         canvas.requestRenderAll();
@@ -476,7 +601,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     populatePlaceTypes();
 
     const clearSchemeBtn = document.getElementById('clearSchemeBtn');
-
     clearSchemeBtn?.addEventListener('click', () => {
         if (!confirm('Вы уверены, что хотите полностью очистить схему? Это действие нельзя отменить.')) return;
 
