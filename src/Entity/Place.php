@@ -16,15 +16,15 @@ class Place
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['scheme:read', 'place:read'])]
-    private int $id;
+    private ?int $id;
 
     #[ORM\Column(length: 255)]
     #[Groups(['scheme:read', 'place:read'])]
-    private string $name;
+    private ?string $name;
 
     #[ORM\Column(type: Types::FLOAT)]
     #[Groups(['scheme:read', 'place:read'])]
-    private float $price;
+    private ?int $price;
 
     #[ORM\Column(length: 255)]
     #[Groups(['scheme:read', 'place:read'])]
@@ -35,7 +35,7 @@ class Place
         return $this->id;
     }
 
-    public function setId(int $id): Place
+    public function setId(?int $id): Place
     {
         $this->id = $id;
         return $this;
@@ -46,18 +46,18 @@ class Place
         return $this->name;
     }
 
-    public function setName(string $name): Place
+    public function setName(?string $name): Place
     {
         $this->name = $name;
         return $this;
     }
 
-    public function getPrice(): float
+    public function getPrice(): int
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): Place
+    public function setPrice(?int $price): Place
     {
         $this->price = $price;
         return $this;
@@ -68,7 +68,7 @@ class Place
         return $this->color;
     }
 
-    public function setColor(string $color): static
+    public function setColor(?string $color): static
     {
         $this->color = $color;
 
