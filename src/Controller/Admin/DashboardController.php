@@ -70,7 +70,6 @@ class DashboardController extends AbstractDashboardController
                 ->setPermission('ROLE_ADMIN');
         }
 
-
         yield MenuItem::section('Мероприятия и билеты')
             ->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Мероприятия', 'fa fa-calendar-check', Event::class)
@@ -82,10 +81,10 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Места', 'fa fa-chair', Place::class)
             ->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::section('Терминалы и сеансы');
+        yield MenuItem::section('Терминалы и сессии');
         yield MenuItem::linkToCrud('Терминалы', 'fa fa-desktop', Terminal::class)
             ->setPermission('ROLE_ADMIN');
-        yield MenuItem::linkToCrud('Сеансы', 'fa fa-clock', Sessions::class);
+        yield MenuItem::linkToCrud('Сессии', 'fa fa-clock', Sessions::class);
         yield MenuItem::linkToCrud('Режим ожидания', 'fa fa-terminal', StandBy::class)
             ->setPermission('ROLE_ADMIN');
 
