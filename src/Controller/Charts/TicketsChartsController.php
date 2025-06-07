@@ -55,6 +55,8 @@ class TicketsChartsController extends AbstractController
             $dateFrom = $dateSubmit->getDateFrom();
             $dateTo = $dateSubmit->getDateTo();
             $event = $dateSubmit->getEvent();
+
+            $dateTo->setTime(23, 59, 59);
         }
 
         $tickets = $ticketRepo->findByDateInterval($dateFrom, $dateTo, $event);
