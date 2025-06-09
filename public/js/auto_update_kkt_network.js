@@ -1,5 +1,5 @@
 function updateTerminalsStatus() {
-    fetch('/api/terminals-ping')
+    fetch('/api/terminals-ping', {headers: {'X-API-KEY': '16777761'}})
         .then(response => response.json())
         .then(pingData => {
             const pingMap = {};
@@ -9,7 +9,7 @@ function updateTerminalsStatus() {
 
             console.log(pingData);
 
-            fetch('/api/terminals')
+            fetch('/api/terminals', {headers: {'X-API-KEY': '16777761'}})
                 .then(response => response.json())
                 .then(terminals => {
                     terminals.forEach(terminal => {
